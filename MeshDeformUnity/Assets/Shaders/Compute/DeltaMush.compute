@@ -1,0 +1,136 @@
+﻿#pragma kernel DeformMesh
+#pragma kernel LaplacianFilter
+#pragma kernel WeightedLaplacianFilter
+#define ThreadGroupSizeX 512
+
+struct BoneWeights
+{
+	float4 weights;
+	int4 indices;
+};
+
+struct OutputVertex
+{
+    float3 pos;
+    float3 normal;
+};
+
+// input
+StructuredBuffer<float3> Vertices;
+StructuredBuffer<float3> Normals;
+StructuredBuffer<BoneWeights> Weights;
+StructuredBuffer<float4x4> Bones;
+StructuredBuffer<int> Adjacency;
+int AdjacentNeighborCount;
+int VertexCount;
+
+StructuredBuffer<OutputVertex> Input;
+StructuredBuffer<OutputVertex> Delta;
+bool DeltaPass;
+
+// output
+RWStructuredBuffer<OutputVertex> Output;
+
+
+[numthreads(ThreadGroupSizeX, 1, 1)]
+void DeformMesh (uint3 groupID : SV_GroupID, uint3 groupThreadID : SV_GroupThreadID)
+{
+	int idx = ThreadGroupSizeX * groupID.x + groupThreadID.x;
+	if (idx >= VertexCount)
+		return;
+
+	float3 pos = Vertices[idx];
+	float3 normal = Normals[idx];
+	int4 boneIndices = Weights[idx].indices;
+	float4 boneWeights = Weights[idx].weights;
+
+	float4x4 bm = 
+		Bones[boneIndices.x] * boneWeights.x + 
+		Bones[boneIndices.y] * boneWeights.y +
+		Bones[boneIndices.z] * boneWeights.z +
+		Bones[boneIndices.w] * boneWeights.w;
+
+	float treatPosAsVector = (DeltaPass) ? 0: 1;
+	Output[idx].pos		= mul(bm, float4(pos, treatPosAsVector)).xyz;
+	Output[idx].normal	= mul(bm, float4(normal, 0)).xyz;
+}
+
+[numthreads(ThreadGroupSizeX, 1, 1)]
+void LaplacianFilter (uint3 groupID : SV_GroupID, uint3 groupThreadID : SV_GroupThreadID)
+{
+	int idx = ThreadGroupSizeX * groupID.x + groupThreadID.x;
+	if (idx >= VertexCount)
+		return;
+
+	float3 p = float3(0,0,0);
+	float3 n = float3(0,0,0);
+
+	int count = 0;
+	for (int j=0; j < AdjacentNeighborCount; j++)
+	{
+		int i = Adjacency[idx * AdjacentNeighborCount + j];
+		if (i < 0)
+			break;
+
+		p += Input[i].pos - Input[idx].pos;
+		n += Input[i].normal - Input[idx].normal;
+		count++;
+	}
+
+	Output[idx].pos = Input[idx].pos + p / count;
+	Output[idx].normal = Input[idx].normal + n / count;
+
+	if (DeltaPass)
+	{
+		Output[idx].pos += Delta[idx].pos;
+		Output[idx].normal += Delta[idx].normal;
+	}
+}
+
+[numthreads(ThreadGroupSizeX, 1, 1)]
+void WeightedLaplacianFilter (uint3 groupID : SV_GroupID, uint3 groupThreadID : SV_GroupThreadID)
+{
+	int idx = ThreadGroupSizeX * groupID.x + groupThreadID.x;
+	if (idx >= VertexCount)
+		return;
+
+	float3 p = float3(0,0,0);
+	float3 n = float3(0,0,0);
+
+	float posTotalWeight = 0;
+	float nrmTotalWeight = 0;
+	for (int j=0; j < AdjacentNeighborCount; j++)
+	{
+		int i = Adjacency[idx * AdjacentNeighborCount + j];
+		if (idx == i)
+			continue;
+		if (i < 0)
+			break;
+
+		float3 posDiff = Input[i].pos - Input[idx].pos;
+		float3 nrmDiff = Input[i].normal - Input[idx].normal;
+
+		float posSqr = dot(posDiff, posDiff);
+		float nrmSqr = dot(nrmDiff, nrmDiff);
+		if (posSqr < 1e-8f)
+			continue;
+
+		float posWeight = rsqrt(posSqr);
+		float nrmWeight = rsqrt(nrmSqr);
+
+		p += posDiff * posWeight;
+		n += nrmDiff * nrmWeight;
+
+		posTotalWeight += posWeight;
+		nrmTotalWeight += nrmWeight;
+	}
+
+	Output[idx].pos = Input[idx].pos + ((posTotalWeight > 1e-4f) ? p / posTotalWeight: 0.0f);
+	Output[idx].normal = Input[idx].normal + ((nrmTotalWeight > 1e-4f) ? (n / nrmTotalWeight): 0.0f);
+
+	if (DeltaPass)
+	{
+		Output[idx].pos += Delta[idx].pos;
+		Output[idx].normal += Delta[idx].normal;
+	}
+}
