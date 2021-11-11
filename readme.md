@@ -23,7 +23,7 @@ Currently a test project with Unity 2020.3.13.
 
 ## For Developers
 
-
+Scene `Scenes/Test1.unity` for test. Currently, compute shader's implementation seems to be wrong.
 
 
 
