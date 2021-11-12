@@ -3,6 +3,7 @@ using UnityEditor;
 using System;
 using System.IO;
 
+//[ExecuteInEditMode]
 public class DeltaMushSkinnedMesh : MonoBehaviour
 {
 	public int iterations = 10;
@@ -451,6 +452,8 @@ public class DeltaMushSkinnedMesh : MonoBehaviour
 				computeShader.SetBuffer(laplacianKernel, "Delta", outputCB[2]);
 				ductTapedMaterial.SetBuffer("Vertices", outputCB[(i+1)%2]);
 			}
+			//computeShader.SetBuffer(laplacianKernel, "Delta", outputCB[2]);
+
 			computeShader.SetBool("DeltaPass", lastIteration && !disableDeltaPass);
 			computeShader.SetBuffer(laplacianKernel, "Input", outputCB[i%2]);
 			computeShader.SetBuffer(laplacianKernel, "Output", outputCB[(i+1)%2]);

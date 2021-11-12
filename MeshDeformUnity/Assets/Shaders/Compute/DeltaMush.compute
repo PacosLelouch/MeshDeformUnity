@@ -44,13 +44,25 @@ void DeformMesh (uint3 groupID : SV_GroupID, uint3 groupThreadID : SV_GroupThrea
 	int4 boneIndices = Weights[idx].indices;
 	float4 boneWeights = Weights[idx].weights;
 
-	float4x4 bm = 
-		Bones[boneIndices.x] * boneWeights.x + 
-		Bones[boneIndices.y] * boneWeights.y +
-		Bones[boneIndices.z] * boneWeights.z +
-		Bones[boneIndices.w] * boneWeights.w;
+	float4x4 bm = Bones[boneIndices.x] * boneWeights.x;
+	//if (boneIndices.x >= 0)
+	//{
+	//	bm += Bones[boneIndices.x] * boneWeights.x;
+	//}
+	if (boneIndices.y >= 0)
+	{
+		bm += Bones[boneIndices.y] * boneWeights.y;
+	}
+	if (boneIndices.z >= 0)
+	{
+		bm += Bones[boneIndices.z] * boneWeights.z;
+	}
+	if (boneIndices.w >= 0)
+	{
+		bm += Bones[boneIndices.w] * boneWeights.w;
+	}
 
-	float treatPosAsVector = (DeltaPass) ? 0: 1;
+	float treatPosAsVector = (DeltaPass) ? 0.: 1.;
 	Output[idx].pos		= mul(bm, float4(pos, treatPosAsVector)).xyz;
 	Output[idx].normal	= mul(bm, float4(normal, 0)).xyz;
 }
@@ -77,8 +89,8 @@ void LaplacianFilter (uint3 groupID : SV_GroupID, uint3 groupThreadID : SV_Group
 		count++;
 	}
 
-	Output[idx].pos = Input[idx].pos + p / count;
-	Output[idx].normal = Input[idx].normal + n / count;
+	Output[idx].pos = count > 0 ? Input[idx].pos + p / count : Input[idx].pos;
+	Output[idx].normal = count > 0 ? Input[idx].normal + n / count : Input[idx].pos;
 
 	if (DeltaPass)
 	{
