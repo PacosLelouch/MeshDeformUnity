@@ -32,6 +32,7 @@ Scene `Scenes/Test1.unity` for test. Currently, compute shader's implementation 
 ## Credit
 
 1. [Unity](https://unity.com/)
+1. [Math.NET Numerics](https://github.com/mathnet/mathnet-numerics)
 
 
 
