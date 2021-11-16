@@ -127,9 +127,11 @@ public class MeshUtils : MonoBehaviour
 	/// </summary>
 	/// <param name="vCount">Vertex Count</param>
 	/// <param name="adjacencyMatrix">Adjacent Matrix</param>
+	/// <param name="normalized">Normalize Laplacian matrix if true</param>
 	/// <param name="weightedSmooth">Boolean to control Laplacian matrix. Implement for "false" first.</param>
 	/// <returns>Laplacian matrix: MathNet.Numerics.LinearAlgebra.Single.SparseMatrix</returns>
-	public static SparseMatrix BuildLaplacianMatrixFromAdjacentMatrix(int vCount, int[,] adjacencyMatrix, bool weightedSmooth = false)
+	public static SparseMatrix BuildLaplacianMatrixFromAdjacentMatrix(
+		int vCount, int[,] adjacencyMatrix, bool normalize = true, bool weightedSmooth = false)
 	{
 		Profiler.BeginSample("BuildLaplacianMatrixFromAdjacentMatrix");
 		SparseMatrix lapl = new SparseMatrix(vCount, vCount);
@@ -148,7 +150,25 @@ public class MeshUtils : MonoBehaviour
 				++viDeg;
 				lapl.At(vi, vj, -1);
 			}
-			lapl.At(vi, vi, viDeg);
+
+			if (!normalize)
+            {
+				lapl.At(vi, vi, viDeg);
+			}
+			else
+			{
+				for (int j = 0; j < maxNeighbors; j++)
+				{
+					int vj = adjacencyMatrix[vi, j];
+					if (vj < 0)
+					{
+						break;
+					}
+					lapl.At(vi, vj, lapl.At(vi, vj) / viDeg);
+				}
+				lapl.At(vi, vi, 1.0f);
+			}
+
 		}
 
 		Profiler.EndSample();
