@@ -3,6 +3,7 @@ using UnityEditor;
 using System;
 using System.IO;
 using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.LinearAlgebra.Single;
 
 //[ExecuteInEditMode]
 public class DirectDeltaMushSkinnedMesh : MonoBehaviour
@@ -74,11 +75,11 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 
 	void Start()
 	{
-		// Start Test Math.NET
-		MathNet.Numerics.LinearAlgebra.Single.SparseMatrix B = new MathNet.Numerics.LinearAlgebra.Single.SparseMatrix(3, 3);
-		B.At(0, 1, 1.0f);
-		Debug.Log("B:" + B);
-		// End Test Math.NET
+		//// Start Test Math.NET
+		//MathNet.Numerics.LinearAlgebra.Single.SparseMatrix B = new MathNet.Numerics.LinearAlgebra.Single.SparseMatrix(3, 3);
+		//B.At(0, 1, 1.0f);
+		//Debug.Log("B:" + B);
+		//// End Test Math.NET
 
 		skin = GetComponent<SkinnedMeshRenderer>();
 		mesh = skin.sharedMesh;
@@ -87,6 +88,10 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 		deformedMesh = new DeformedMesh(mesh.vertexCount);
 
 		adjacencyMatrix = GetCachedAdjacencyMatrix(mesh, adjacencyMatchingVertexTolerance);
+
+		// Store matrix to Math.NET matrix.
+		SparseMatrix lapl = MeshUtils.BuildLaplacianMatrixFromAdjacentMatrix(mesh.vertexCount, adjacencyMatrix, weightedSmooth);
+		//TODO: Other matrix. Had better implement functions in MeshUtils.cs
 
 		// Compute
 		if (SystemInfo.supportsComputeShaders && computeShader && ductTapedShader)

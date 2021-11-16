@@ -2,7 +2,9 @@ using UnityEngine;
 using UnityEngine.Profiling;
 using System.Collections;
 using System.Collections.Generic;
- 
+using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.LinearAlgebra.Single;
+
 /*
 	Vertecx adjacency functions
 */
@@ -118,5 +120,14 @@ public class MeshUtils : MonoBehaviour
 		}
 
 		Profiler.EndSample();
+	}
+
+	public static SparseMatrix BuildLaplacianMatrixFromAdjacentMatrix(int vCount, int[,] adjacencyMatrix, bool weightedSmooth = false)
+	{
+		Profiler.BeginSample("BuildLaplacianMatrixFromAdjacentMatrix");
+		SparseMatrix lapl = new SparseMatrix(vCount, vCount);
+		//TODO: Build laplacian matrix
+		Profiler.EndSample();
+		return lapl;
 	}
 }
