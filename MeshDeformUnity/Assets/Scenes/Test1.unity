@@ -238,7 +238,7 @@ MonoBehaviour:
   iterations: 20
   deformNormals: 1
   weightedSmooth: 0
-  useCompute: 1
+  useCompute: 0
   adjacencyMatchingVertexTolerance: 0.0001
   debugMode: 0
   ductTapedShader: {fileID: 4800000, guid: 943eb20414209bd42aad0509708d1766, type: 3}
