@@ -205,14 +205,15 @@ public class MeshUtils// : MonoBehaviour
 
 		SparseMatrix smooth = SparseMatrix.CreateIdentity(vCount);
 		SparseMatrix smoothNext = new SparseMatrix(vCount);
-		for (int i = 0; i < iteration; ++i)
-		{
-			smooth.Multiply(a, smoothNext);
-			smooth = smoothNext;
-		}
+        for (int i = 0; i < iteration; ++i)
+        {
+            smooth.Multiply(a, smoothNext);
+            smooth = smoothNext;
+        }
+        //a.Power(iteration, smooth);
 
 
-		Profiler.EndSample();
+        Profiler.EndSample();
 		return smooth;
 	}
 }

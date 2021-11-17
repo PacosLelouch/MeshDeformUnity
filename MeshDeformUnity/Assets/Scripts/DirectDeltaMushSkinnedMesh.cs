@@ -96,7 +96,7 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 
 		// Store matrix to Math.NET matrix.
 		int vCount = mesh.vertexCount;
-		SparseMatrix lapl = MeshUtils.BuildLaplacianMatrixFromAdjacentMatrix(vCount, adjacencyMatrix, weightedSmooth);
+		SparseMatrix lapl = MeshUtils.BuildLaplacianMatrixFromAdjacentMatrix(vCount, adjacencyMatrix, true, weightedSmooth);
 		SparseMatrix B = MeshUtils.BuildSmoothMatrixFromLaplacian(lapl, translationSmooth, iterations);
 		SparseMatrix C = MeshUtils.BuildSmoothMatrixFromLaplacian(lapl, rotationSmooth, iterations);
 
@@ -513,14 +513,14 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 
 	void DrawVerticesVsSkin()
 	{
-		for (int i = 0; i < deformedMesh.vertexCount; i++)
-		{
-			Vector3 position = deformedMesh.vertices[i];
-			Vector3 normal = deformedMesh.normals[i];
+		//for (int i = 0; i < deformedMesh.vertexCount; i++)
+		//{
+		//	Vector3 position = deformedMesh.vertices[i];
+		//	Vector3 normal = deformedMesh.normals[i];
 
-			Color color = Color.green;
-			Debug.DrawRay(position, normal * 0.01f, color);
-		}
+		//	Color color = Color.green;
+		//	Debug.DrawRay(position, normal * 0.01f, color);
+		//}
 	}
 	#endregion
 }
