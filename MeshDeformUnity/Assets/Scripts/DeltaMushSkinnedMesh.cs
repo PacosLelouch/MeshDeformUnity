@@ -176,9 +176,9 @@ public class DeltaMushSkinnedMesh : MonoBehaviour
 
 		bool compareWithSkinning = debugMode == DebugMode.CompareWithSkinning;
 
-		if (actuallyUseCompute)
-			UpdateMeshOnGPU();
-		else
+		//if (actuallyUseCompute)
+		//	UpdateMeshOnGPU();
+		//else
 			UpdateMeshOnCPU();
 
 		if (compareWithSkinning)
@@ -420,6 +420,7 @@ public class DeltaMushSkinnedMesh : MonoBehaviour
 
 	void UpdateMeshOnGPU()
 	{
+		//TODO
 		int threadGroupsX = (mesh.vertices.Length + computeThreadGroupSizeX - 1) / computeThreadGroupSizeX;
 
 		Matrix4x4[] boneMatrices = new Matrix4x4[skin.bones.Length];
