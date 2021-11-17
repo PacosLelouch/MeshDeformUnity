@@ -176,10 +176,10 @@ public class DeltaMushSkinnedMesh : MonoBehaviour
 
 		bool compareWithSkinning = debugMode == DebugMode.CompareWithSkinning;
 
-		//if (actuallyUseCompute)
-		//	UpdateMeshOnGPU();
-		//else
-			UpdateMeshOnCPU();
+        if (actuallyUseCompute)
+            UpdateMeshOnGPU();
+        else
+            UpdateMeshOnCPU();
 
 		if (compareWithSkinning)
 			DrawVerticesVsSkin();

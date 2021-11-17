@@ -13,7 +13,7 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 
 	public float translationSmooth = 0.1f; 
 	public float rotationSmooth = 0.1f;
-	public float dm_blend = 1.0f;
+	public float dm_blend = 0.0f;
 
 	public bool deformNormals = true;
 	public bool weightedSmooth = true;
@@ -203,29 +203,29 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 		else
 			useCompute = false;
 
-		UpdateDeltaVectors();
+		//UpdateDeltaVectors();
 
-		// Experiment with blending bone weights
-		prefilteredBoneWeights = new float[mesh.vertexCount, skin.bones.Length];
-		for (int i = 0; i < mesh.vertexCount; ++i)
-		{
-			prefilteredBoneWeights[i, bw[i].boneIndex0] = bw[i].weight0;
-			prefilteredBoneWeights[i, bw[i].boneIndex1] = bw[i].weight1;
-			prefilteredBoneWeights[i, bw[i].boneIndex2] = bw[i].weight2;
-			prefilteredBoneWeights[i, bw[i].boneIndex3] = bw[i].weight3;
-		}
-		for (int i = 0; i < iterations; i++)
-			prefilteredBoneWeights = SmoothFilter.distanceWeightedLaplacianFilter(mesh.vertices, prefilteredBoneWeights, adjacencyMatrix);
+		//// Experiment with blending bone weights
+		//prefilteredBoneWeights = new float[mesh.vertexCount, skin.bones.Length];
+		//for (int i = 0; i < mesh.vertexCount; ++i)
+		//{
+		//	prefilteredBoneWeights[i, bw[i].boneIndex0] = bw[i].weight0;
+		//	prefilteredBoneWeights[i, bw[i].boneIndex1] = bw[i].weight1;
+		//	prefilteredBoneWeights[i, bw[i].boneIndex2] = bw[i].weight2;
+		//	prefilteredBoneWeights[i, bw[i].boneIndex3] = bw[i].weight3;
+		//}
+		//for (int i = 0; i < iterations; i++)
+		//	prefilteredBoneWeights = SmoothFilter.distanceWeightedLaplacianFilter(mesh.vertices, prefilteredBoneWeights, adjacencyMatrix);
 
-		var boneCount = skin.bones.Length;
-		for (int i = 0; i < mesh.vertexCount; ++i)
-		{
-			float l = 0.0f;
-			for (int b = 0; b < boneCount; ++b)
-				l += prefilteredBoneWeights[i, b];
-			for (int b = 0; b < boneCount; ++b)
-				prefilteredBoneWeights[i, b] += prefilteredBoneWeights[i, b] * (1.0f - l);
-		}
+		//var boneCount = skin.bones.Length;
+		//for (int i = 0; i < mesh.vertexCount; ++i)
+		//{
+		//	float l = 0.0f;
+		//	for (int b = 0; b < boneCount; ++b)
+		//		l += prefilteredBoneWeights[i, b];
+		//	for (int b = 0; b < boneCount; ++b)
+		//		prefilteredBoneWeights[i, b] += prefilteredBoneWeights[i, b] * (1.0f - l);
+		//}
 	}
 
 	void OnDestroy()
@@ -399,7 +399,8 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
             {
 				for(int col = 0; col < 4; ++col)
                 {
-					boneMatricesDense[i][row, col] = boneMatrices[i][row, col];
+					boneMatricesDense[i][row, col] = //mesh.bindposes[i][row, col];
+						boneMatrices[i][row, col];
 				}
             }
 		}
@@ -411,7 +412,7 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 			DenseMatrix mat4 = new DenseMatrix(4);
 			for(int bi = 0; bi < boneMatrices.Length; ++bi)
             {
-				mat4 += boneMatricesDense[bi] * omegas[vi, bi];
+				mat4 += omegas[vi, bi] * boneMatricesDense[bi];
             }
 			DenseMatrix Qi = new DenseMatrix(3);
 			for (int row = 0; row < 3; ++row)
@@ -459,7 +460,11 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 			oriVertex[3] = 1.0f;
 
 			DenseVector finalVertex = gamma * oriVertex;
-			deformedMesh.vertices[vi] = new Vector3(finalVertex[0], finalVertex[1], finalVertex[2]);
+			float fvx = finalVertex[0];
+			float fvy = finalVertex[1];
+			float fvz = finalVertex[2];
+			Vector3 vertex = new Vector3(fvx, fvy, fvz);
+			deformedMesh.vertices[vi] = vertex;
 
 			DenseVector oriNormal = new DenseVector(4);
 			oriNormal[0] = ns[vi].x;
@@ -467,7 +472,8 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 			oriNormal[2] = ns[vi].z;
 			oriNormal[3] = 0.0f;
 			DenseVector finalNormal = gamma * oriNormal;
-			deformedMesh.normals[vi] = new Vector3(finalNormal[0], finalNormal[1], finalNormal[2]);
+			Vector3 normal = new Vector3(finalNormal[0], finalNormal[1], finalNormal[2]);
+			deformedMesh.normals[vi] = normal;
 		}
 
 		//deformedMesh.vertices[i] = vertexMatrix.MultiplyPoint3x4(vs[i]);
