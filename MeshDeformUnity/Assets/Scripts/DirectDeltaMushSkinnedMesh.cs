@@ -4,11 +4,16 @@ using System;
 using System.IO;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Single;
+using MathNet.Numerics.LinearAlgebra.Solvers;
 
 //[ExecuteInEditMode]
 public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 {
 	public int iterations = 10;
+
+	public float translationSmooth = 0.1f; 
+	public float rotationSmooth = 0.1f;
+
 	public bool deformNormals = true;
 	public bool weightedSmooth = true;
 	public bool useCompute = true;
@@ -90,8 +95,12 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 		adjacencyMatrix = GetCachedAdjacencyMatrix(mesh, adjacencyMatchingVertexTolerance);
 
 		// Store matrix to Math.NET matrix.
-		SparseMatrix lapl = MeshUtils.BuildLaplacianMatrixFromAdjacentMatrix(mesh.vertexCount, adjacencyMatrix, weightedSmooth);
-		//TODO: Other matrix. Had better implement functions in MeshUtils.cs
+		int vCount = mesh.vertexCount;
+		SparseMatrix lapl = MeshUtils.BuildLaplacianMatrixFromAdjacentMatrix(vCount, adjacencyMatrix, weightedSmooth);
+		SparseMatrix B = MeshUtils.BuildSmoothMatrixFromLaplacian(lapl, translationSmooth, iterations);
+		SparseMatrix C = MeshUtils.BuildSmoothMatrixFromLaplacian(lapl, rotationSmooth, iterations);
+
+		//TODO: Precompute others.
 
 		// Compute
 		if (SystemInfo.supportsComputeShaders && computeShader && ductTapedShader)

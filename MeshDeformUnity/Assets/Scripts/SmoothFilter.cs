@@ -7,7 +7,7 @@ using System.Collections.Generic;
  
 	Based on MarkGX SmoothFilter.cs (Jan 2011)
 */
-public class SmoothFilter : MonoBehaviour 
+public class SmoothFilter// : MonoBehaviour 
 {
 	public static Vector3[] laplacianFilter(Vector3[] sv, int[,] adjacencyMatrix)
 	{
