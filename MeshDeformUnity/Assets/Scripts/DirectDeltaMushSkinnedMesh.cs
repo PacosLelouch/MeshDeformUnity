@@ -3,11 +3,17 @@ using UnityEditor;
 using System;
 using System.IO;
 using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.LinearAlgebra.Single;
+using MathNet.Numerics.LinearAlgebra.Solvers;
 
 //[ExecuteInEditMode]
 public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 {
 	public int iterations = 10;
+
+	public float translationSmooth = 0.1f; 
+	public float rotationSmooth = 0.1f;
+
 	public bool deformNormals = true;
 	public bool weightedSmooth = true;
 	public bool useCompute = true;
@@ -74,11 +80,11 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 
 	void Start()
 	{
-		// Start Test Math.NET
-		MathNet.Numerics.LinearAlgebra.Single.SparseMatrix B = new MathNet.Numerics.LinearAlgebra.Single.SparseMatrix(3, 3);
-		B.At(0, 1, 1.0f);
-		Debug.Log("B:" + B);
-		// End Test Math.NET
+		//// Start Test Math.NET
+		//MathNet.Numerics.LinearAlgebra.Single.SparseMatrix B = new MathNet.Numerics.LinearAlgebra.Single.SparseMatrix(3, 3);
+		//B.At(0, 1, 1.0f);
+		//Debug.Log("B:" + B);
+		//// End Test Math.NET
 
 		skin = GetComponent<SkinnedMeshRenderer>();
 		mesh = skin.sharedMesh;
@@ -87,6 +93,14 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 		deformedMesh = new DeformedMesh(mesh.vertexCount);
 
 		adjacencyMatrix = GetCachedAdjacencyMatrix(mesh, adjacencyMatchingVertexTolerance);
+
+		// Store matrix to Math.NET matrix.
+		int vCount = mesh.vertexCount;
+		SparseMatrix lapl = MeshUtils.BuildLaplacianMatrixFromAdjacentMatrix(vCount, adjacencyMatrix, true, weightedSmooth);
+		SparseMatrix B = MeshUtils.BuildSmoothMatrixFromLaplacian(lapl, translationSmooth, iterations);
+		SparseMatrix C = MeshUtils.BuildSmoothMatrixFromLaplacian(lapl, rotationSmooth, iterations);
+
+		//TODO: Precompute others.
 
 		// Compute
 		if (SystemInfo.supportsComputeShaders && computeShader && ductTapedShader)
@@ -499,14 +513,14 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 
 	void DrawVerticesVsSkin()
 	{
-		for (int i = 0; i < deformedMesh.vertexCount; i++)
-		{
-			Vector3 position = deformedMesh.vertices[i];
-			Vector3 normal = deformedMesh.normals[i];
+		//for (int i = 0; i < deformedMesh.vertexCount; i++)
+		//{
+		//	Vector3 position = deformedMesh.vertices[i];
+		//	Vector3 normal = deformedMesh.normals[i];
 
-			Color color = Color.green;
-			Debug.DrawRay(position, normal * 0.01f, color);
-		}
+		//	Color color = Color.green;
+		//	Debug.DrawRay(position, normal * 0.01f, color);
+		//}
 	}
 	#endregion
 }

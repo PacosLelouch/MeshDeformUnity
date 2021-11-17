@@ -2,11 +2,14 @@ using UnityEngine;
 using UnityEngine.Profiling;
 using System.Collections;
 using System.Collections.Generic;
- 
+using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.LinearAlgebra.Single;
+using MathNet.Numerics.LinearAlgebra.Single.Solvers;
+
 /*
 	Vertecx adjacency functions
 */
-public class MeshUtils : MonoBehaviour 
+public class MeshUtils// : MonoBehaviour 
 {
 	const float EPSILON = 1e-8f;
 
@@ -118,5 +121,99 @@ public class MeshUtils : MonoBehaviour
 		}
 
 		Profiler.EndSample();
+	}
+
+	/// <summary>
+	/// Build Laplacian matrix from adjacent matrix.
+	/// </summary>
+	/// <param name="vCount">Vertex Count</param>
+	/// <param name="adjacencyMatrix">Adjacent Matrix</param>
+	/// <param name="normalized">Normalize Laplacian matrix if true</param>
+	/// <param name="weightedSmooth">Boolean to control Laplacian matrix. Implement for "false" first.</param>
+	/// <returns>Laplacian matrix: MathNet.Numerics.LinearAlgebra.Single.SparseMatrix</returns>
+	public static SparseMatrix BuildLaplacianMatrixFromAdjacentMatrix(
+		int vCount, int[,] adjacencyMatrix, bool normalize = true, bool weightedSmooth = false)
+	{
+		Profiler.BeginSample("BuildLaplacianMatrixFromAdjacentMatrix");
+		SparseMatrix lapl = new SparseMatrix(vCount, vCount);
+		int maxNeighbors = adjacencyMatrix.GetLength(1);
+
+		for (int vi = 0; vi < vCount; vi++)
+		{
+			int viDeg = 0;
+			for (int j = 0; j < maxNeighbors; j++)
+			{
+				int vj = adjacencyMatrix[vi, j];
+				if (vj < 0)
+                {
+					break;
+                }
+				++viDeg;
+				lapl.At(vi, vj, -1);
+			}
+
+			if (!normalize)
+            {
+				lapl.At(vi, vi, viDeg);
+			}
+			else
+			{
+				for (int j = 0; j < maxNeighbors; j++)
+				{
+					int vj = adjacencyMatrix[vi, j];
+					if (vj < 0)
+					{
+						break;
+					}
+					lapl.At(vi, vj, lapl.At(vi, vj) / viDeg);
+				}
+				lapl.At(vi, vi, 1.0f);
+			}
+
+		}
+
+		Profiler.EndSample();
+		return lapl;
+	}
+
+	/// <summary>
+	/// Build smooth matrix from laplacian. (So slow...)
+	/// </summary>
+	/// <param name="lapl">Laplacian matrix</param>
+	/// <param name="smoothLambda">Lambda parameter</param>
+	/// <param name="iteration">iteration</param>
+	/// <returns>Smooth matrix: MathNet.Numerics.LinearAlgebra.Single.SparseMatrix</returns>
+	public static SparseMatrix BuildSmoothMatrixFromLaplacian(SparseMatrix lapl, float smoothLambda, int iteration)
+	{
+		Profiler.BeginSample("BuildSmoothMatrixFromLaplacian");
+		int vCount = lapl.ColumnCount;
+		SparseMatrix identity = SparseMatrix.CreateIdentity(vCount);
+		//SparseMatrix b = (identity + (smoothLambda / iteration) * lapl);
+		//SparseMatrix bt = new SparseMatrix(vCount);
+		//b.Transpose(bt);
+
+		//SparseMatrix smooth = SparseMatrix.CreateIdentity(vCount);
+		//SparseMatrix smoothNext = new SparseMatrix(vCount); 
+		//GpBiCg gpBiCg = new GpBiCg();
+		//for (int i = 0; i < iteration; ++i)
+		//      {
+		//	bt.TrySolveIterative(smooth, smoothNext, gpBiCg);
+		//	smooth = smoothNext;
+		//      }
+
+		SparseMatrix a = (identity - (smoothLambda / iteration) * lapl);
+
+		SparseMatrix smooth = SparseMatrix.CreateIdentity(vCount);
+		SparseMatrix smoothNext = new SparseMatrix(vCount);
+        for (int i = 0; i < iteration; ++i)
+        {
+            smooth.Multiply(a, smoothNext);
+            smooth = smoothNext;
+        }
+        //a.Power(iteration, smooth);
+
+
+        Profiler.EndSample();
+		return smooth;
 	}
 }
