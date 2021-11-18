@@ -36,3 +36,8 @@ Scene `Scenes/Test1.unity` for test. Currently, compute shader's implementation 
 
 
 
+## Presentations
+
+1. [Pitch](https://docs.google.com/presentation/d/1vwb5RJlEHCoQyWLS116C5mvTnZ4lScZMC8LQFr1BcJU/)
+2. [Milestone 1](https://docs.google.com/presentation/d/1DddtqMYNPFK_de73_3AZ3dXIFQ1iPYBxOBAKMeCrQ8A/)
+

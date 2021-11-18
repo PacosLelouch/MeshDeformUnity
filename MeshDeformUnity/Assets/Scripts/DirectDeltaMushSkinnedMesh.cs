@@ -399,8 +399,8 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
             {
 				for(int col = 0; col < 4; ++col)
                 {
-					boneMatricesDense[i][row, col] = //mesh.bindposes[i][row, col];
-						boneMatrices[i][row, col];
+					boneMatricesDense[i][row, col] = mesh.bindposes[i][row, col];
+						//boneMatrices[i][row, col];
 				}
             }
 		}
@@ -412,7 +412,7 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 			DenseMatrix mat4 = new DenseMatrix(4);
 			for(int bi = 0; bi < boneMatrices.Length; ++bi)
             {
-				mat4 += omegas[vi, bi] * boneMatricesDense[bi];
+				mat4 += boneMatricesDense[bi] * omegas[vi, bi];
             }
 			DenseMatrix Qi = new DenseMatrix(3);
 			for (int row = 0; row < 3; ++row)
@@ -442,6 +442,10 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 			DenseMatrix U = (DenseMatrix)SVD.U;
 			DenseMatrix VT = (DenseMatrix)SVD.VT;
 			DenseMatrix R = U * VT;
+			//for(int i = 0; i < 3; ++i)
+			//{
+			//	R.SetColumn(i, R.Column(i).Normalize(2d));
+			//}
 
 			DenseVector ti = qi - (R * pi);
 
@@ -473,7 +477,7 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 			oriNormal[3] = 0.0f;
 			DenseVector finalNormal = gamma * oriNormal;
 			Vector3 normal = new Vector3(finalNormal[0], finalNormal[1], finalNormal[2]);
-			deformedMesh.normals[vi] = normal;
+			deformedMesh.normals[vi] = normal.normalized;
 		}
 
 		//deformedMesh.vertices[i] = vertexMatrix.MultiplyPoint3x4(vs[i]);
