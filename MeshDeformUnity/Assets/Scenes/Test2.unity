@@ -132,7 +132,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 2986d32750737b64da3cb002e10341c4, type: 3}
       propertyPath: m_RootOrder
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 2986d32750737b64da3cb002e10341c4, type: 3}
       propertyPath: m_LocalScale.x
@@ -192,7 +192,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 2986d32750737b64da3cb002e10341c4, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2986d32750737b64da3cb002e10341c4, type: 3}
@@ -208,15 +208,15 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 565690314}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4a635344223b8ec45a8a1baf7fa4c9f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  iterations: 10
+  iterations: 20
   deformNormals: 1
   weightedSmooth: 0
-  useCompute: 0
+  useCompute: 1
   adjacencyMatchingVertexTolerance: 0.0001
   debugMode: 0
   ductTapedShader: {fileID: 4800000, guid: 943eb20414209bd42aad0509708d1766, type: 3}
@@ -229,7 +229,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 565690314}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 27d9411464f641c48b32b238dec9ff0c, type: 3}
   m_Name: 
@@ -431,7 +431,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 1954694b75597094c97770bcd6f3fba2, type: 3}
       propertyPath: m_RootOrder
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 1954694b75597094c97770bcd6f3fba2, type: 3}
       propertyPath: m_LocalPosition.x
@@ -477,6 +477,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: SmoothCylinder
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 1954694b75597094c97770bcd6f3fba2, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1954694b75597094c97770bcd6f3fba2, type: 3}
 --- !u!1 &1292340583 stripped
@@ -491,7 +495,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1292340583}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 27d9411464f641c48b32b238dec9ff0c, type: 3}
   m_Name: 
@@ -503,6 +507,27 @@ MonoBehaviour:
   deformNormals: 1
   weightedSmooth: 0
   useCompute: 0
+  adjacencyMatchingVertexTolerance: 0.0001
+  debugMode: 0
+  ductTapedShader: {fileID: 4800000, guid: 943eb20414209bd42aad0509708d1766, type: 3}
+  computeShader: {fileID: 7200000, guid: d8cac5718e2023643a794073fd1098fb, type: 3}
+  usePrefilteredBoneWeights: 0
+--- !u!114 &1292340587
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1292340583}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4a635344223b8ec45a8a1baf7fa4c9f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  iterations: 10
+  deformNormals: 1
+  weightedSmooth: 0
+  useCompute: 1
   adjacencyMatchingVertexTolerance: 0.0001
   debugMode: 0
   ductTapedShader: {fileID: 4800000, guid: 943eb20414209bd42aad0509708d1766, type: 3}
@@ -575,6 +600,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: SmoothStick
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 81fcea899d90bf34a94fb71761a2e2ea, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3779745573541866595, guid: 81fcea899d90bf34a94fb71761a2e2ea, type: 3}
       propertyPath: m_Name
       value: pSmoothStick
@@ -598,10 +627,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a635344223b8ec45a8a1baf7fa4c9f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  iterations: 10
+  iterations: 20
   deformNormals: 1
   weightedSmooth: 0
-  useCompute: 0
+  useCompute: 1
   adjacencyMatchingVertexTolerance: 0.0001
   debugMode: 0
   ductTapedShader: {fileID: 4800000, guid: 943eb20414209bd42aad0509708d1766, type: 3}
