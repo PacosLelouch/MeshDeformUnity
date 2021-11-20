@@ -3,6 +3,8 @@
 #pragma kernel WeightedLaplacianFilter
 #define ThreadGroupSizeX 512
 
+#define IDENTITY_MATRIX float4x4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
+
 struct BoneWeights
 {
 	float4 weights;
@@ -44,12 +46,7 @@ void DeformMesh (uint3 groupID : SV_GroupID, uint3 groupThreadID : SV_GroupThrea
 	int4 boneIndices = Weights[idx].indices;
 	float4 boneWeights = Weights[idx].weights;
 
-	float4x4 bm = boneIndices.x >= 0 ? Bones[boneIndices.x] * boneWeights.x : 
-		{
-			1.0, 0.0, 0.0, 0.0,
-			0.0, 1.0, 0.0, 0.0,
-			0.0, 0.0, 1.0, 0.0,
-			0.0, 0.0, 0.0, 1.0};
+	float4x4 bm = boneIndices.x >= 0 ? Bones[boneIndices.x] * boneWeights.x : IDENTITY_MATRIX;
 	//if (boneIndices.x >= 0)
 	//{
 	//	bm += Bones[boneIndices.x] * boneWeights.x;
