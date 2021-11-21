@@ -90,6 +90,7 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 		//Debug.Log("B:" + B);
 		//// End Test Math.NET
 
+		computeShader = Instantiate(computeShader);
 		skin = GetComponent<SkinnedMeshRenderer>();
 		mesh = skin.sharedMesh;
 		meshForCPUOutput = Instantiate(mesh);
@@ -121,16 +122,19 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 		for (int i = 0; i < vCount; ++i)
 		{
 			BoneWeight w = bw[i];
-			W[i, w.boneIndex0] = w.weight0;
-			if(w.boneIndex1 >= 0)
+			if (w.boneIndex0 >= 0 && w.weight0 > 0.0f)
+			{
+				W[i, w.boneIndex0] = w.weight0;
+			}
+			if (w.boneIndex1 >= 0 && w.weight1 > 0.0f)
 			{
 				W[i, w.boneIndex1] = w.weight1;
 			}
-			if (w.boneIndex2 >= 0)
+			if (w.boneIndex2 >= 0 && w.weight2 > 0.0f)
 			{
 				W[i, w.boneIndex2] = w.weight2;
 			}
-			if (w.boneIndex3 >= 0)
+			if (w.boneIndex3 >= 0 && w.weight3 > 0.0f)
 			{
 				W[i, w.boneIndex3] = w.weight3;
 			}
@@ -247,8 +251,6 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 
 	void LateUpdate()
 	{
-		UpdateDeltaVectors();
-
 		bool compareWithSkinning = debugMode == DebugMode.CompareWithSkinning;
 
 		if (actuallyUseCompute)
@@ -358,34 +360,13 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 		return delta;
 	}
 
-	void UpdateDeltaVectors()
-	{
-		var lastFilter = smoothFilter;
-		smoothFilter = GetSmoothFilter();
-
-		if (iterations == 0)
-			return;
-
-		if (smoothFilter == lastFilter && iterations == deltaIterations)
-			return;
-
-		deltaV = GetSmoothDeltas(mesh.vertices, adjacencyMatrix, smoothFilter, iterations);
-		deltaN = GetSmoothDeltas(mesh.normals, adjacencyMatrix, smoothFilter, iterations);
-		deltaIterations = iterations;
-
-		// compute
-		if (deltavCB != null && deltanCB != null)
-		{
-			deltavCB.SetData(deltaV);
-			deltanCB.SetData(deltaN);
-		}
-	}
-
 	void UpdateMeshOnCPU()
 	{
 		Matrix4x4[] boneMatrices = new Matrix4x4[skin.bones.Length];
 		for (int i = 0; i < boneMatrices.Length; i++)
 			boneMatrices[i] = skin.bones[i].localToWorldMatrix * mesh.bindposes[i];
+
+		Debug.Log(boneMatrices[1]);
 
 		BoneWeight[] bw = mesh.boneWeights;
 		Vector3[] vs = mesh.vertices;
@@ -399,8 +380,8 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
             {
 				for(int col = 0; col < 4; ++col)
                 {
-					boneMatricesDense[i][row, col] = mesh.bindposes[i][row, col];
-						//boneMatrices[i][row, col];
+					boneMatricesDense[i][row, col] = //mesh.bindposes[i][row, col];
+						boneMatrices[i][row, col];
 				}
             }
 		}
@@ -437,48 +418,52 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 			qi.OuterProduct(pi, qi_piT);
 			DenseMatrix M = Qi - qi_piT;
 
-			// SVD
-			var SVD = M.Svd(true);
-			DenseMatrix U = (DenseMatrix)SVD.U;
-			DenseMatrix VT = (DenseMatrix)SVD.VT;
-			DenseMatrix R = U * VT;
-			//for(int i = 0; i < 3; ++i)
-			//{
-			//	R.SetColumn(i, R.Column(i).Normalize(2d));
-			//}
+			// SVD, still need to fix
+			Matrix4x4 gamma = Matrix4x4.zero;
 
-			DenseVector ti = qi - (R * pi);
+			//float detM = M.Determinant();
+			if(true)//(Math.Abs(detM) >= 1e-4f)
+			{
+				var SVD = M.Svd(true);
+				DenseMatrix U = (DenseMatrix)SVD.U;
+				DenseMatrix VT = (DenseMatrix)SVD.VT;
+				DenseMatrix R = U * VT;
+				//for(int i = 0; i < 3; ++i)
+				//{
+				//	R.SetColumn(i, R.Column(i).Normalize(2d));
+				//}
 
-			// Get gamma
-			DenseMatrix gamma = new DenseMatrix(4);
-			gamma.SetSubMatrix(0, 0, R);
-			gamma[0, 3] = ti[0];
-			gamma[1, 3] = ti[1];
-			gamma[2, 3] = ti[2];
-			gamma[3, 3] = 1.0f;
+				DenseVector ti = qi - (R * pi);
 
-			DenseVector oriVertex = new DenseVector(4);
-			oriVertex[0] = vs[vi].x;
-			oriVertex[1] = vs[vi].y;
-			oriVertex[2] = vs[vi].z;
-			oriVertex[3] = 1.0f;
+				// Get gamma
+				for (int row = 0; row < 3; ++row)
+				{
+					for (int col = 0; col < 3; ++col)
+					{
+						gamma[row, col] = R[row, col];
+					}
+				}
+				gamma[0, 3] = ti[0];
+				gamma[1, 3] = ti[1];
+				gamma[2, 3] = ti[2];
+				gamma[3, 3] = 1.0f;
+			}
+            else
+            {
+				gamma = Matrix4x4.identity;
+			}
 
-			DenseVector finalVertex = gamma * oriVertex;
-			float fvx = finalVertex[0];
-			float fvy = finalVertex[1];
-			float fvz = finalVertex[2];
-			Vector3 vertex = new Vector3(fvx, fvy, fvz);
+			Vector3 vertex = gamma.MultiplyPoint3x4(vs[vi]);
 			deformedMesh.vertices[vi] = vertex;
 
-			DenseVector oriNormal = new DenseVector(4);
-			oriNormal[0] = ns[vi].x;
-			oriNormal[1] = ns[vi].y;
-			oriNormal[2] = ns[vi].z;
-			oriNormal[3] = 0.0f;
-			DenseVector finalNormal = gamma * oriNormal;
-			Vector3 normal = new Vector3(finalNormal[0], finalNormal[1], finalNormal[2]);
+			Vector3 normal = gamma.MultiplyVector(ns[vi]);
 			deformedMesh.normals[vi] = normal.normalized;
-		}
+
+            //if (vi == 49)
+            //{
+            //    Debug.Log(gamma.ToString() + "\n" + vertex.ToString() + "\n" + normal.ToString());
+            //}
+        }
 
 		//deformedMesh.vertices[i] = vertexMatrix.MultiplyPoint3x4(vs[i]);
 		//deformedMesh.normals[i] = vertexMatrix.MultiplyVector(ns[i]);
@@ -646,9 +631,11 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 		if (actuallyUseCompute)
 		{
 			mesh.bounds = skin.bounds; // skin is actually disabled, so it only remembers the last animation frame
+			//Graphics.DrawMesh(mesh, skin.transform.parent.worldToLocalMatrix * skin.transform.localToWorldMatrix, ductTapedMaterial, 0);
 			Graphics.DrawMesh(mesh, Matrix4x4.identity, ductTapedMaterial, 0);
 		}
 		else
+			//Graphics.DrawMesh(mesh, skin.transform.parent.worldToLocalMatrix * skin.transform.localToWorldMatrix, skin.sharedMaterial, 0);
 			Graphics.DrawMesh(meshForCPUOutput, Matrix4x4.identity, skin.sharedMaterial, 0);
 	}
 

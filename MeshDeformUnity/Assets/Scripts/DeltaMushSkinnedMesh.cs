@@ -73,6 +73,7 @@ public class DeltaMushSkinnedMesh : MonoBehaviour
 
 	void Start()
 	{
+		computeShader = Instantiate(computeShader);
 		skin = GetComponent<SkinnedMeshRenderer>();
 		mesh = skin.sharedMesh;
 		meshForCPUOutput = Instantiate(mesh);
@@ -471,9 +472,11 @@ public class DeltaMushSkinnedMesh : MonoBehaviour
 		{
 			mesh.bounds = skin.bounds; // skin is actually disabled, so it only remembers the last animation frame
 			Graphics.DrawMesh(mesh, Matrix4x4.identity, ductTapedMaterial, 0);
+			//Graphics.DrawMesh(mesh, skin.transform.parent.worldToLocalMatrix * skin.transform.localToWorldMatrix, ductTapedMaterial, 0);
 		}
 		else
 			Graphics.DrawMesh(meshForCPUOutput, Matrix4x4.identity, skin.sharedMaterial, 0);
+			//Graphics.DrawMesh(meshForCPUOutput, skin.transform.parent.worldToLocalMatrix * skin.transform.localToWorldMatrix, skin.sharedMaterial, 0);
 	}
 
 	void DrawDeltas()
