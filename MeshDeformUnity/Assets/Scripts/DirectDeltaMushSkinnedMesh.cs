@@ -21,12 +21,12 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 
 	public float adjacencyMatchingVertexTolerance = 1e-4f;
 
-	public enum DebugMode { Off, CompareWithSkinning, SmoothOnly, Deltas }
+	public enum DebugMode { Off, CompareWithSkinning, /*SmoothOnly, Deltas*/ }
 
 	public DebugMode debugMode = DebugMode.Off;
 
-	bool disableDeltaPass { get { return (debugMode == DebugMode.SmoothOnly || debugMode == DebugMode.Deltas); } }
-	bool actuallyUseCompute { get { return useCompute && debugMode != DebugMode.CompareWithSkinning && debugMode != DebugMode.Deltas && !usePrefilteredBoneWeights; } }
+	bool disableDeltaPass { get { return false;/*return (debugMode == DebugMode.SmoothOnly || debugMode == DebugMode.Deltas);*/ } }
+	bool actuallyUseCompute { get { return useCompute && debugMode != DebugMode.CompareWithSkinning /*&& debugMode != DebugMode.Deltas && !usePrefilteredBoneWeights*/; } }
 
 	internal Mesh mesh;
 	internal Mesh meshForCPUOutput;
@@ -90,7 +90,10 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 		//Debug.Log("B:" + B);
 		//// End Test Math.NET
 
-		computeShader = Instantiate(computeShader);
+		if (computeShader)
+		{
+			computeShader = Instantiate(computeShader);
+		}
 		skin = GetComponent<SkinnedMeshRenderer>();
 		mesh = skin.sharedMesh;
 		meshForCPUOutput = Instantiate(mesh);
@@ -260,8 +263,8 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 
 		if (compareWithSkinning)
 			DrawVerticesVsSkin();
-		else if (debugMode == DebugMode.Deltas)
-			DrawDeltas();
+		//else if (debugMode == DebugMode.Deltas)
+		//	DrawDeltas();
 		else
 			DrawMesh();
 
@@ -366,7 +369,7 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 		for (int i = 0; i < boneMatrices.Length; i++)
 			boneMatrices[i] = skin.bones[i].localToWorldMatrix * mesh.bindposes[i];
 
-		Debug.Log(boneMatrices[1]);
+		//Debug.Log(boneMatrices[1]);
 
 		BoneWeight[] bw = mesh.boneWeights;
 		Vector3[] vs = mesh.vertices;
@@ -385,8 +388,6 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 				}
             }
 		}
-
-		//TODO: Bug + Slow
 
 		for (int vi = 0; vi < mesh.vertexCount; ++vi)
         {
@@ -422,8 +423,8 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 			Matrix4x4 gamma = Matrix4x4.zero;
 
 			//float detM = M.Determinant();
-			if(true)//(Math.Abs(detM) >= 1e-4f)
-			{
+			//if(true)//(Math.Abs(detM) >= 1e-4f)
+			//{
 				var SVD = M.Svd(true);
 				DenseMatrix U = (DenseMatrix)SVD.U;
 				DenseMatrix VT = (DenseMatrix)SVD.VT;
@@ -447,28 +448,24 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 				gamma[1, 3] = ti[1];
 				gamma[2, 3] = ti[2];
 				gamma[3, 3] = 1.0f;
-			}
-            else
-            {
-				gamma = Matrix4x4.identity;
-			}
+			//}
+   //         else
+   //         {
+			//	gamma = Matrix4x4.identity;
+			//}
 
 			Vector3 vertex = gamma.MultiplyPoint3x4(vs[vi]);
 			deformedMesh.vertices[vi] = vertex;
 
+			//TODO: Bug
 			Vector3 normal = gamma.MultiplyVector(ns[vi]);
-			deformedMesh.normals[vi] = normal.normalized;
+			deformedMesh.normals[vi] = normal;// normal.normalized;
 
-            //if (vi == 49)
-            //{
-            //    Debug.Log(gamma.ToString() + "\n" + vertex.ToString() + "\n" + normal.ToString());
-            //}
-        }
-
-		//deformedMesh.vertices[i] = vertexMatrix.MultiplyPoint3x4(vs[i]);
-		//deformedMesh.normals[i] = vertexMatrix.MultiplyVector(ns[i]);
-		//deformedMesh.deltaV[i] = vertexMatrix.MultiplyVector(deltaV[i]);
-		//deformedMesh.deltaN[i] = vertexMatrix.MultiplyVector(deltaN[i]);
+			//if (vi == 49)
+			//{
+			//    Debug.Log(gamma.ToString() + "\n" + vertex.ToString() + "\n" + normal.ToString());
+			//}
+		}
 
 		Bounds bounds = new Bounds();
 		for (int i = 0; i < deformedMesh.vertexCount; i++)
@@ -477,107 +474,6 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 		meshForCPUOutput.vertices = deformedMesh.vertices;
 		meshForCPUOutput.normals = deformedMesh.normals;
 		meshForCPUOutput.bounds = bounds;
-
-		//if (usePrefilteredBoneWeights)
-		//{
-		//	var boneCount = boneMatrices.Length;
-		//	for (int i = 0; i < mesh.vertexCount; i++)
-		//	{
-		//		var vertexMatrix = Matrix4x4.zero;
-
-		//		for (int n = 0; n < 16; n++)
-		//			for (int b = 0; b < boneCount; b++)
-		//				vertexMatrix[n] += boneMatrices[b][n] * prefilteredBoneWeights[i, b];
-
-		//		deformedMesh.vertices[i] = vertexMatrix.MultiplyPoint3x4(vs[i] - deltaV[i]);
-		//		deformedMesh.normals[i] = vertexMatrix.MultiplyVector(ns[i] - deltaN[i]);
-		//		deformedMesh.deltaV[i] = vertexMatrix.MultiplyVector(deltaV[i]);
-		//		deformedMesh.deltaN[i] = vertexMatrix.MultiplyVector(deltaN[i]);
-		//	}
-
-		//	if (iterations > 0 && !disableDeltaPass)
-		//		for (int i = 0; i < deformedMesh.vertexCount; i++)
-		//			deformedMesh.vertices[i] = deformedMesh.vertices[i] + deformedMesh.deltaV[i];
-
-		//	if (iterations > 0 && deformNormals)
-		//		for (int i = 0; i < deformedMesh.vertexCount; i++)
-		//		{
-		//			deformedMesh.normals[i] = deformedMesh.normals[i] + deformedMesh.deltaN[i];
-		//			//deformedMesh.normals[i].Normalize();
-		//		}
-
-		//	meshForCPUOutput.vertices = deformedMesh.vertices;
-		//	meshForCPUOutput.normals = deformedMesh.normals;
-
-		//	return;
-		//}
-
-		//for (int i = 0; i < mesh.vertexCount; i++)
-		//{
-		//	BoneWeight boneWeight = bw[i];
-
-		//	Matrix4x4 bm0 = boneMatrices[boneWeight.boneIndex0];
-		//	Matrix4x4 bm1 = boneMatrices[boneWeight.boneIndex1];
-		//	Matrix4x4 bm2 = boneMatrices[boneWeight.boneIndex2];
-		//	Matrix4x4 bm3 = boneMatrices[boneWeight.boneIndex3];
-
-		//	Matrix4x4 vertexMatrix = new Matrix4x4();
-
-		//	if (skin.quality == SkinQuality.Bone1)
-		//	{
-		//		vertexMatrix = bm0;
-		//	}
-		//	else if (skin.quality == SkinQuality.Bone2)
-		//	{
-		//		for (int n = 0; n < 16; n++)
-		//		{
-		//			vertexMatrix[n] =
-		//				bm0[n] * boneWeight.weight0 +
-		//				bm1[n] * (1 - boneWeight.weight0);
-		//		}
-		//	}
-		//	else
-		//	{
-		//		for (int n = 0; n < 16; n++)
-		//		{
-		//			vertexMatrix[n] =
-		//				bm0[n] * boneWeight.weight0 +
-		//				bm1[n] * boneWeight.weight1 +
-		//				bm2[n] * boneWeight.weight2 +
-		//				bm3[n] * boneWeight.weight3;
-		//		}
-		//	}
-
-		//deformedMesh.vertices[i] = vertexMatrix.MultiplyPoint3x4(vs[i]);
-		//deformedMesh.normals[i] = vertexMatrix.MultiplyVector(ns[i]);
-		//deformedMesh.deltaV[i] = vertexMatrix.MultiplyVector(deltaV[i]);
-		//deformedMesh.deltaN[i] = vertexMatrix.MultiplyVector(deltaN[i]);
-
-		//	for (int i = 0; i < iterations; i++)
-		//	{
-		//		deformedMesh.vertices = smoothFilter(deformedMesh.vertices, adjacencyMatrix);
-		//		if (deformNormals)
-		//			deformedMesh.normals = smoothFilter(deformedMesh.normals, adjacencyMatrix);
-		//	}
-
-		//	if (iterations > 0 && !disableDeltaPass)
-		//		for (int i = 0; i < deformedMesh.vertexCount; i++)
-		//			deformedMesh.vertices[i] = deformedMesh.vertices[i] + deformedMesh.deltaV[i];
-
-		//	if (iterations > 0 && deformNormals)
-		//		for (int i = 0; i < deformedMesh.vertexCount; i++)
-		//		{
-		//			deformedMesh.normals[i] = deformedMesh.normals[i] + deformedMesh.deltaN[i];
-		//			//deformedMesh.normals[i].Normalize();
-		//		}
-
-		//	Bounds bounds = new Bounds();
-		//	for (int i = 0; i < deformedMesh.vertexCount; i++)
-		//		bounds.Encapsulate(deformedMesh.vertices[i]);
-
-		//	meshForCPUOutput.vertices = deformedMesh.vertices;
-		//	meshForCPUOutput.normals = deformedMesh.normals;
-		//	meshForCPUOutput.bounds = bounds;
 	}
 
 	void UpdateMeshOnGPU()
@@ -641,16 +537,16 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 
 	void DrawDeltas()
 	{
-		for (int i = 0; i < deformedMesh.vertexCount; i++)
-		{
-			Vector3 position = deformedMesh.vertices[i];
-			Vector3 delta = deformedMesh.deltaV[i];
+		//for (int i = 0; i < deformedMesh.vertexCount; i++)
+		//{
+		//	Vector3 position = deformedMesh.vertices[i];
+		//	Vector3 delta = deformedMesh.deltaV[i];
 
-			Color color = Color.green;
-			Debug.DrawRay(position, delta, color);
-		}
+		//	Color color = Color.green;
+		//	Debug.DrawRay(position, delta, color);
+		//}
 
-		Graphics.DrawMesh(meshForCPUOutput, Matrix4x4.identity, skin.sharedMaterial, 0);
+		//Graphics.DrawMesh(meshForCPUOutput, Matrix4x4.identity, skin.sharedMaterial, 0);
 	}
 
 	void DrawVerticesVsSkin()

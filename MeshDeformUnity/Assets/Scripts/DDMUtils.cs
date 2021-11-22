@@ -58,7 +58,7 @@ public class DDMUtils
 		for (int k = 0; k < n; k++)
 		{
 			float w = W[k, j];
-			float b = B[k, j];
+			float b = B[k, i];
 			if (w != 0 && b != 0)
 			{
 				float[] v = new float[] { V[k, 0], V[k, 1], V[k, 2], 1.0f };

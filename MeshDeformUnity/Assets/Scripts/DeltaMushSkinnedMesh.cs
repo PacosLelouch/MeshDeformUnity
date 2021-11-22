@@ -73,7 +73,10 @@ public class DeltaMushSkinnedMesh : MonoBehaviour
 
 	void Start()
 	{
-		computeShader = Instantiate(computeShader);
+		if (computeShader)
+		{
+			computeShader = Instantiate(computeShader);
+		}
 		skin = GetComponent<SkinnedMeshRenderer>();
 		mesh = skin.sharedMesh;
 		meshForCPUOutput = Instantiate(mesh);
