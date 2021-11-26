@@ -46,20 +46,20 @@ void DeformMesh (uint3 groupID : SV_GroupID, uint3 groupThreadID : SV_GroupThrea
 	int4 boneIndices = Weights[idx].indices;
 	float4 boneWeights = Weights[idx].weights;
 
-	float4x4 bm = boneIndices.x >= 0 ? Bones[boneIndices.x] * boneWeights.x : IDENTITY_MATRIX;
+	float4x4 bm = boneIndices.x >= 0 && boneWeights.x > 0. ? Bones[boneIndices.x] * boneWeights.x : IDENTITY_MATRIX;
 	//if (boneIndices.x >= 0)
 	//{
 	//	bm += Bones[boneIndices.x] * boneWeights.x;
 	//}
-	if (boneIndices.y >= 0)
+	if (boneIndices.y >= 0 && boneWeights.y > 0.)
 	{
 		bm += Bones[boneIndices.y] * boneWeights.y;
 	}
-	if (boneIndices.z >= 0)
+	if (boneIndices.z >= 0 && boneWeights.z > 0.)
 	{
 		bm += Bones[boneIndices.z] * boneWeights.z;
 	}
-	if (boneIndices.w >= 0)
+	if (boneIndices.w >= 0 && boneWeights.w > 0.)
 	{
 		bm += Bones[boneIndices.w] * boneWeights.w;
 	}

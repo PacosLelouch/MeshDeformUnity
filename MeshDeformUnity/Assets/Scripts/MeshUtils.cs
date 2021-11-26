@@ -201,7 +201,7 @@ public class MeshUtils// : MonoBehaviour
 		//	smooth = smoothNext;
 		//      }
 
-		SparseMatrix a = (identity - (smoothLambda / iteration) * lapl);
+		SparseMatrix a = iteration == 0 ? identity : (identity - (smoothLambda / iteration) * lapl);
 
 		SparseMatrix smooth = SparseMatrix.CreateIdentity(vCount);
 		SparseMatrix smoothNext = new SparseMatrix(vCount);

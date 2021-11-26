@@ -1,3 +1,5 @@
+//#define WITH_SCALE_MATRIX
+
 using UnityEngine;
 using UnityEditor;
 using System;
@@ -11,8 +13,8 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 {
 	public int iterations = 10;
 
-	public float translationSmooth = 0.1f; 
-	public float rotationSmooth = 0.1f;
+	public float translationSmooth = 0.5f; 
+	public float rotationSmooth = 0.5f;
 	public float dm_blend = 0.0f;
 
 	public bool deformNormals = true;
@@ -57,7 +59,7 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 	internal Func<Vector3[], int[,], Vector3[]> smoothFilter;
 
 	internal DenseMatrix[,] omegas;
-	internal DDMUtils ddmUtils;
+	internal DDMUtilsIterative ddmUtils;
 
 	// Compute
 	//[HideInInspector]
@@ -106,8 +108,8 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 		int vCount = mesh.vertexCount;
 		int bCount = skin.bones.Length;
 		SparseMatrix lapl = MeshUtils.BuildLaplacianMatrixFromAdjacentMatrix(vCount, adjacencyMatrix, true, weightedSmooth);
-		SparseMatrix B = MeshUtils.BuildSmoothMatrixFromLaplacian(lapl, translationSmooth, iterations);
-		SparseMatrix C = MeshUtils.BuildSmoothMatrixFromLaplacian(lapl, rotationSmooth, iterations);
+		//SparseMatrix B = MeshUtils.BuildSmoothMatrixFromLaplacian(lapl, translationSmooth, iterations);
+		//SparseMatrix C = MeshUtils.BuildSmoothMatrixFromLaplacian(lapl, rotationSmooth, iterations);
 
 		DenseMatrix V = new DenseMatrix(vCount, 3);
 		Vector3[] vs = mesh.vertices;
@@ -143,25 +145,30 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 			}
 		}
 
-		ddmUtils = new DDMUtils();
+		SparseMatrix I = SparseMatrix.CreateIdentity(vCount);
+		ddmUtils = new DDMUtilsIterative();//new DDMUtils();
 		ddmUtils.dm_blend = dm_blend;
 		ddmUtils.n = vCount;
 		ddmUtils.num_transforms = bCount;
-		ddmUtils.B = B;
-		ddmUtils.C = C;
+		ddmUtils.B = iterations == 0 ? I : I - (translationSmooth / iterations) * lapl;//B;
+		ddmUtils.C = iterations == 0 ? I : I - (rotationSmooth / iterations) * lapl;//C;
 		ddmUtils.V = V;
 		ddmUtils.W = W;
 
+		ddmUtils.translationSmooth = translationSmooth;
+		ddmUtils.rotationSmooth = rotationSmooth;
+
 		ddmUtils.InitCache();
 
-		omegas = new DenseMatrix[vCount, bCount];
-		for(int i = 0; i < vCount; ++i)
-        {
-			for(int j = 0; j < bCount; ++j)
-			{
-				omegas[i, j] = ddmUtils.compute_omega(i, j);
-			}
-        }
+		omegas = ddmUtils.ComputeOmegas(vCount, bCount, iterations);
+		//	new DenseMatrix[vCount, bCount];
+		//for(int i = 0; i < vCount; ++i)
+		//      {
+		//	for(int j = 0; j < bCount; ++j)
+		//	{
+		//		omegas[i, j] = ddmUtils.compute_omega(i, j);
+		//	}
+		//      }
 		//TODO: Precompute others.
 
 		// Compute
@@ -338,7 +345,7 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 			return computeShader.FindKernel("LaplacianFilter");
 	}
 
-	#region Delta Mush implementation
+	#region Direct Delta Mush implementation
 	private Func<Vector3[], int[,], Vector3[]> GetSmoothFilter()
 	{
 		if (weightedSmooth)
@@ -366,8 +373,29 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 	void UpdateMeshOnCPU()
 	{
 		Matrix4x4[] boneMatrices = new Matrix4x4[skin.bones.Length];
+#if WITH_SCALE_MATRIX
+		Matrix4x4[] scaleMatrices = new Matrix4x4[skin.bones.Length];
+#endif // WITH_SCALE_MATRIX
 		for (int i = 0; i < boneMatrices.Length; i++)
-			boneMatrices[i] = skin.bones[i].localToWorldMatrix * mesh.bindposes[i];
+		{
+			Matrix4x4 localToWorld = skin.bones[i].localToWorldMatrix;
+			Matrix4x4 bindPose = mesh.bindposes[i];
+#if WITH_SCALE_MATRIX
+			Vector3 localScale = localToWorld.lossyScale;
+			Vector3 bpScale = bindPose.lossyScale;
+
+			localToWorld.SetColumn(0, localToWorld.GetColumn(0) / localScale.x);
+			localToWorld.SetColumn(1, localToWorld.GetColumn(1) / localScale.y);
+			localToWorld.SetColumn(2, localToWorld.GetColumn(2) / localScale.z);
+			bindPose.SetColumn(0, bindPose.GetColumn(0) / bpScale.x);
+			bindPose.SetColumn(1, bindPose.GetColumn(1) / bpScale.y);
+			bindPose.SetColumn(2, bindPose.GetColumn(2) / bpScale.z);
+
+			//scaleMatrices[i] = Matrix4x4.Scale(localScale) * Matrix4x4.Scale(bindPose.MultiplyVector(bpScale));
+			scaleMatrices[i] = Matrix4x4.Scale(localScale) * Matrix4x4.Scale(bpScale);
+#endif // WITH_SCALE_MATRIX
+			boneMatrices[i] = localToWorld * bindPose;
+		}
 
 		//Debug.Log(boneMatrices[1]);
 
@@ -390,12 +418,37 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 		}
 
 		for (int vi = 0; vi < mesh.vertexCount; ++vi)
-        {
+		{
+#if WITH_SCALE_MATRIX
+			Matrix4x4 scaleMatrix = (bw[vi].boneIndex0 >= 0 && bw[vi].weight0 > 0.0f) ? scaleMatrices[bw[vi].boneIndex0] : Matrix4x4.identity;
+			if(bw[vi].boneIndex1 >= 0 && bw[vi].weight1 > 0.0f)
+            {
+				for(int idx = 0; idx < 16; ++idx)
+				{
+					scaleMatrix[idx] += scaleMatrices[bw[vi].boneIndex1][idx];
+				}
+			}
+			if (bw[vi].boneIndex2 >= 0 && bw[vi].weight2 > 0.0f)
+			{
+				for (int idx = 0; idx < 16; ++idx)
+				{
+					scaleMatrix[idx] += scaleMatrices[bw[vi].boneIndex2][idx];
+				}
+			}
+			if (bw[vi].boneIndex3 >= 0 && bw[vi].weight3 > 0.0f)
+			{
+				for (int idx = 0; idx < 16; ++idx)
+				{
+					scaleMatrix[idx] += scaleMatrices[bw[vi].boneIndex3][idx];
+				}
+			}
+#endif // WITH_SCALE_MATRIX
+
 			DenseMatrix mat4 = new DenseMatrix(4);
-			for(int bi = 0; bi < boneMatrices.Length; ++bi)
+			for (int bi = 0; bi < boneMatrices.Length; ++bi)
             {
 				mat4 += boneMatricesDense[bi] * omegas[vi, bi];
-            }
+			}
 			DenseMatrix Qi = new DenseMatrix(3);
 			for (int row = 0; row < 3; ++row)
 			{
@@ -449,10 +502,13 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 				gamma[2, 3] = ti[2];
 				gamma[3, 3] = 1.0f;
 			//}
-   //         else
-   //         {
+			//         else
+			//         {
 			//	gamma = Matrix4x4.identity;
 			//}
+#if WITH_SCALE_MATRIX
+			gamma *= scaleMatrix;
+#endif // WITH_SCALE_MATRIX
 
 			Vector3 vertex = gamma.MultiplyPoint3x4(vs[vi]);
 			deformedMesh.vertices[vi] = vertex;
@@ -518,10 +574,10 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 			computeShader.Dispatch(laplacianKernel, threadGroupsX, 1, 1);
 		}
 	}
-	#endregion
+#endregion
 
 
-	#region Helpers
+#region Helpers
 	void DrawMesh()
 	{
 		if (actuallyUseCompute)
@@ -560,5 +616,5 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 		//	Debug.DrawRay(position, normal * 0.01f, color);
 		//}
 	}
-	#endregion
+#endregion
 }

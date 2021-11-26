@@ -208,7 +208,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 565690314}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4a635344223b8ec45a8a1baf7fa4c9f0, type: 3}
   m_Name: 
@@ -229,14 +229,14 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 565690314}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 27d9411464f641c48b32b238dec9ff0c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  iterations: 10
-  translationSmooth: 0.1
-  rotationSmooth: 0.1
+  iterations: 1
+  translationSmooth: 0.9
+  rotationSmooth: 0.9
   dm_blend: 1
   deformNormals: 1
   weightedSmooth: 0
@@ -263,10 +263,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27d9411464f641c48b32b238dec9ff0c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  iterations: 1
-  translationSmooth: 0.1
-  rotationSmooth: 0.1
+  iterations: 10
+  translationSmooth: 0.5
+  rotationSmooth: 0.5
   dm_blend: 0
+  deformNormals: 1
+  weightedSmooth: 0
+  useCompute: 0
+  adjacencyMatchingVertexTolerance: 0.0001
+  debugMode: 0
+  ductTapedShader: {fileID: 4800000, guid: 943eb20414209bd42aad0509708d1766, type: 3}
+  computeShader: {fileID: 7200000, guid: d8cac5718e2023643a794073fd1098fb, type: 3}
+  usePrefilteredBoneWeights: 0
+--- !u!114 &576110882
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 576110878}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4a635344223b8ec45a8a1baf7fa4c9f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  iterations: 1
   deformNormals: 1
   weightedSmooth: 0
   useCompute: 0
@@ -529,9 +550,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27d9411464f641c48b32b238dec9ff0c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  iterations: 0
-  translationSmooth: 0.1
-  rotationSmooth: 0.1
+  iterations: 1
+  translationSmooth: 0.9
+  rotationSmooth: 0.9
   dm_blend: 0
   deformNormals: 1
   weightedSmooth: 0
