@@ -4,6 +4,15 @@ using MathNet.Numerics.LinearAlgebra.Single;
 
 public class DDMUtilsIterative
 {
+	public struct OmegaWithIndex
+    {
+		public float m00;
+		public float m01; public float m11;
+		public float m02; public float m12; public float m22;
+		public float m03; public float m13; public float m23; public float m33;
+		public int boneIndex;
+    }
+
 	public int n;
 	public float dm_blend;
 	public int num_transforms;
@@ -229,4 +238,132 @@ public class DDMUtilsIterative
 
 		return omegas;
 	}
+
+	static private Matrix4x4 ConvertOmegaFromMathNet(DenseMatrix omega)
+    {
+		Matrix4x4 outOmega = Matrix4x4.zero;
+		for(int i = 0; i < 4; ++i)
+        {
+			for(int j = 0; j < 4; ++j)
+			{
+				outOmega[i, j] = omega[i, j];
+			}
+        }
+		return outOmega;
+    }
+
+	//static public Matrix4x4[] CompressOmegas1D(DenseMatrix[,] omegas, BoneWeight[] boneWeights)
+	//{
+	//	int vCount = boneWeights.Length;
+	//	Matrix4x4[] compressedOmegas = new Matrix4x4[vCount * 4];
+	//	for (int vi = 0; vi < vCount; ++vi)
+	//	{
+	//		BoneWeight bw = boneWeights[vi];
+	//		if (bw.boneIndex0 >= 0 && bw.weight0 > 0.0f)
+	//		{
+	//			compressedOmegas[vi * 4 + 0] = ConvertOmegaFromMathNet(omegas[vi, bw.boneIndex0]);
+	//		}
+	//		if (bw.boneIndex1 >= 0 && bw.weight1 > 0.0f)
+	//		{
+	//			compressedOmegas[vi * 4 + 1] = ConvertOmegaFromMathNet(omegas[vi, bw.boneIndex1]);
+	//		}
+	//		if (bw.boneIndex2 >= 0 && bw.weight2 > 0.0f)
+	//		{
+	//			compressedOmegas[vi * 4 + 2] = ConvertOmegaFromMathNet(omegas[vi, bw.boneIndex2]);
+	//		}
+	//		if (bw.boneIndex3 >= 0 && bw.weight3 > 0.0f)
+	//		{
+	//			compressedOmegas[vi * 4 + 3] = ConvertOmegaFromMathNet(omegas[vi, bw.boneIndex3]);
+	//		}
+	//	}
+	//	return compressedOmegas;
+	//}
+
+	static public OmegaWithIndex[,] ConvertOmegas1D(DenseMatrix[,] omegas, int omegaCount)
+	{
+		int vCount = omegas.GetLength(0), bCount = omegas.GetLength(1);
+		OmegaWithIndex[,] outOmegas = new OmegaWithIndex[vCount, omegaCount];
+		for (int vi = 0; vi < vCount; ++vi)
+		{
+			int curOmegaCount = 0;
+			for (int bi = 0; bi < bCount; ++bi)
+			{
+				if(curOmegaCount >= omegaCount)
+                {
+					break;
+				}
+				DenseMatrix omega = omegas[vi, bi];
+				float sum = 0.0f;
+				for(int row = 0; row < 4; ++row)
+				{
+					for (int col = 0; col < 4; ++col)
+					{
+						sum += omega[row, col];
+					}
+                }
+				if (sum < 1e-6)
+                {
+					continue;
+                }
+				outOmegas[vi, curOmegaCount].boneIndex = bi;
+				outOmegas[vi, curOmegaCount].m00 = omega[0, 0];
+				outOmegas[vi, curOmegaCount].m01 = omega[0, 1];
+				outOmegas[vi, curOmegaCount].m11 = omega[1, 1];
+				outOmegas[vi, curOmegaCount].m02 = omega[0, 2];
+				outOmegas[vi, curOmegaCount].m12 = omega[1, 2];
+				outOmegas[vi, curOmegaCount].m22 = omega[2, 2];
+				outOmegas[vi, curOmegaCount].m03 = omega[0, 3];
+				outOmegas[vi, curOmegaCount].m13 = omega[1, 3];
+				outOmegas[vi, curOmegaCount].m23 = omega[2, 3];
+				outOmegas[vi, curOmegaCount].m33 = omega[3, 3];
+				++curOmegaCount;
+			}
+			for(; curOmegaCount < omegaCount; ++curOmegaCount)
+            {
+				outOmegas[vi, curOmegaCount].boneIndex = -1;
+			}
+		}
+		return outOmegas;
+	}
+
+	static public Matrix4x4[,] ConvertOmegas2D(DenseMatrix[,] omegas)
+	{
+		int vCount = omegas.GetLength(0), bCount = omegas.GetLength(1);
+		Matrix4x4[,] outOmegas = new Matrix4x4[vCount, bCount];
+		for (int vi = 0; vi < vCount; ++vi)
+		{
+			for (int bi = 0; bi < bCount; ++bi)
+			{
+				outOmegas[vi, bi] = ConvertOmegaFromMathNet(omegas[vi, bi]);
+			}
+		}
+		return outOmegas;
+	}
+
+	static public Matrix4x4[,] CompressOmegas2D(DenseMatrix[,] omegas, BoneWeight[] boneWeights)
+    {
+		int vCount = boneWeights.Length;
+		Matrix4x4[,] compressedOmegas = new Matrix4x4[vCount, 4];
+		for(int vi = 0; vi < vCount; ++vi)
+        {
+			BoneWeight bw = boneWeights[vi];
+			if(bw.boneIndex0 >= 0 && bw.weight0 > 0.0f)
+			{
+				compressedOmegas[vi, 0] = ConvertOmegaFromMathNet(omegas[vi, bw.boneIndex0]);
+			}
+			if (bw.boneIndex1 >= 0 && bw.weight1 > 0.0f)
+			{
+				compressedOmegas[vi, 1] = ConvertOmegaFromMathNet(omegas[vi, bw.boneIndex1]);
+			}
+			if (bw.boneIndex2 >= 0 && bw.weight2 > 0.0f)
+			{
+				compressedOmegas[vi, 2] = ConvertOmegaFromMathNet(omegas[vi, bw.boneIndex2]);
+			}
+			if (bw.boneIndex3 >= 0 && bw.weight3 > 0.0f)
+			{
+				compressedOmegas[vi, 3] = ConvertOmegaFromMathNet(omegas[vi, bw.boneIndex3]);
+			}
+		}
+		return compressedOmegas;
+    }
 }

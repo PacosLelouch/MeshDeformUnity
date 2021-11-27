@@ -11,14 +11,14 @@ using MathNet.Numerics.LinearAlgebra.Solvers;
 //[ExecuteInEditMode]
 public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 {
-	public int iterations = 10;
+	public int iterations = 2;
 
-	public float translationSmooth = 0.5f; 
-	public float rotationSmooth = 0.5f;
+	public float translationSmooth = 0.9f; 
+	public float rotationSmooth = 0.9f;
 	public float dm_blend = 0.0f;
 
 	public bool deformNormals = true;
-	public bool weightedSmooth = true;
+	public bool weightedSmooth = false;//true;
 	public bool useCompute = true;
 
 	public float adjacencyMatchingVertexTolerance = 1e-4f;
@@ -67,18 +67,19 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 	//[HideInInspector]
 	public ComputeShader computeShader;
 	private int deformKernel;
-	private int laplacianKernel;
 	private int computeThreadGroupSizeX;
 
-	internal ComputeBuffer verticesCB;
-	internal ComputeBuffer normalsCB;
-	internal ComputeBuffer deltavCB;
-	internal ComputeBuffer deltanCB;
-	internal ComputeBuffer weightsCB;
-	internal ComputeBuffer bonesCB;
-	internal ComputeBuffer adjacencyCB;
-	internal ComputeBuffer[] outputCB = new ComputeBuffer[3];
+	internal ComputeBuffer verticesCB; // float3
+	internal ComputeBuffer normalsCB; // float3
+
+	internal ComputeBuffer weightsCB; // float4 + int4
+	internal ComputeBuffer bonesCB; // float4x4
+	internal ComputeBuffer omegasCB; // float4x4 * 4
+	internal ComputeBuffer outputCB; // float3 + float3
+
 	internal Material ductTapedMaterial;
+
+	internal const int maxOmegaCount = 16;
 
 	// Experiment with blending bone weights
 	internal float[,] prefilteredBoneWeights;
@@ -123,10 +124,10 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 
 		DenseMatrix W = new DenseMatrix(vCount, bCount);
 
-		BoneWeight[] bw = mesh.boneWeights;
+		BoneWeight[] bws = mesh.boneWeights;
 		for (int i = 0; i < vCount; ++i)
 		{
-			BoneWeight w = bw[i];
+			BoneWeight w = bws[i];
 			if (w.boneIndex0 >= 0 && w.weight0 > 0.0f)
 			{
 				W[i, w.boneIndex0] = w.weight0;
@@ -161,55 +162,41 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 		ddmUtils.InitCache();
 
 		omegas = ddmUtils.ComputeOmegas(vCount, bCount, iterations);
-		//	new DenseMatrix[vCount, bCount];
-		//for(int i = 0; i < vCount; ++i)
-		//      {
-		//	for(int j = 0; j < bCount; ++j)
-		//	{
-		//		omegas[i, j] = ddmUtils.compute_omega(i, j);
-		//	}
-		//      }
 		//TODO: Precompute others.
 
 		// Compute
 		if (SystemInfo.supportsComputeShaders && computeShader && ductTapedShader)
 		{
-			verticesCB = new ComputeBuffer(mesh.vertices.Length, 3 * sizeof(float));
-			normalsCB = new ComputeBuffer(mesh.vertices.Length, 3 * sizeof(float));
-			weightsCB = new ComputeBuffer(mesh.vertices.Length, 4 * sizeof(float) + 4 * sizeof(int));
+			//Matrix4x4[,] compressedOmegas = DDMUtilsIterative.CompressOmegas2D(omegas, bws);
+			DDMUtilsIterative.OmegaWithIndex[,] convertedOmegas = DDMUtilsIterative.ConvertOmegas1D(omegas, maxOmegaCount);
+
+			verticesCB = new ComputeBuffer(vCount, 3 * sizeof(float));
+			normalsCB = new ComputeBuffer(vCount, 3 * sizeof(float));
+			weightsCB = new ComputeBuffer(vCount, 4 * sizeof(float) + 4 * sizeof(int));
+			bonesCB = new ComputeBuffer(bCount, 16 * sizeof(float));
 			verticesCB.SetData(mesh.vertices);
 			normalsCB.SetData(mesh.normals);
-			weightsCB.SetData(mesh.boneWeights);
+			weightsCB.SetData(bws);
 
-			adjacencyCB = new ComputeBuffer(adjacencyMatrix.Length, sizeof(int));
-			var adjArray = new int[adjacencyMatrix.Length];
-			Buffer.BlockCopy(adjacencyMatrix, 0, adjArray, 0, adjacencyMatrix.Length * sizeof(int));
-			adjacencyCB.SetData(adjArray);
+			//omegasCB = new ComputeBuffer(vCount, 16 * sizeof(float) * 4);
+			//omegasCB.SetData(compressedOmegas);
+			omegasCB = new ComputeBuffer(vCount * maxOmegaCount, (10 * sizeof(float) + sizeof(int)));
+			omegasCB.SetData(convertedOmegas);
 
-			bonesCB = new ComputeBuffer(skin.bones.Length, 16 * sizeof(float));
-			deltavCB = new ComputeBuffer(mesh.vertices.Length, 3 * sizeof(float));
-			deltanCB = new ComputeBuffer(mesh.vertices.Length, 3 * sizeof(float));
-
-			outputCB[0] = new ComputeBuffer(mesh.vertices.Length, 6 * sizeof(float));
-			outputCB[1] = new ComputeBuffer(mesh.vertices.Length, 6 * sizeof(float));
-			outputCB[2] = new ComputeBuffer(mesh.vertices.Length, 6 * sizeof(float));
+			outputCB = new ComputeBuffer(vCount, 6 * sizeof(float));
 
 			deformKernel = computeShader.FindKernel("DeformMesh");
 			computeShader.SetBuffer(deformKernel, "Vertices", verticesCB);
 			computeShader.SetBuffer(deformKernel, "Normals", normalsCB);
 			computeShader.SetBuffer(deformKernel, "Weights", weightsCB);
 			computeShader.SetBuffer(deformKernel, "Bones", bonesCB);
-			computeShader.SetInt("VertexCount", mesh.vertices.Length);
-
-			laplacianKernel = GetSmoothKernel();
-			computeShader.SetBuffer(laplacianKernel, "Adjacency", adjacencyCB);
-			computeShader.SetInt("AdjacentNeighborCount", adjacencyMatrix.GetLength(1));
+			computeShader.SetBuffer(deformKernel, "Omegas", omegasCB);
+			computeShader.SetBuffer(deformKernel, "Output", outputCB);
+			computeShader.SetInt("VertexCount", vCount);
 
 			uint threadGroupSizeX, threadGroupSizeY, threadGroupSizeZ;
 			computeShader.GetKernelThreadGroupSizes(deformKernel, out threadGroupSizeX, out threadGroupSizeY, out threadGroupSizeZ);
 			computeThreadGroupSizeX = (int)threadGroupSizeX;
-			computeShader.GetKernelThreadGroupSizes(laplacianKernel, out threadGroupSizeX, out threadGroupSizeY, out threadGroupSizeZ);
-			Debug.Assert(computeThreadGroupSizeX == (int)threadGroupSizeX);
 
 			ductTapedMaterial = new Material(ductTapedShader);
 			ductTapedMaterial.CopyPropertiesFromMaterial(skin.sharedMaterial);
@@ -249,14 +236,10 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 
 		verticesCB.Release();
 		normalsCB.Release();
-		deltavCB.Release();
-		deltanCB.Release();
 		weightsCB.Release();
 		bonesCB.Release();
-		adjacencyCB.Release();
-
-		foreach (var cb in outputCB)
-			cb.Release();
+		omegasCB.Release();
+		outputCB.Release();
 	}
 
 	void LateUpdate()
@@ -337,65 +320,42 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 	}
 	#endregion
 
-	private int GetSmoothKernel()
-	{
-		if (weightedSmooth)
-			return computeShader.FindKernel("WeightedLaplacianFilter");
-		else
-			return computeShader.FindKernel("LaplacianFilter");
-	}
+	//private int GetSmoothKernel()
+	//{
+	//	if (weightedSmooth)
+	//		return computeShader.FindKernel("WeightedLaplacianFilter");
+	//	else
+	//		return computeShader.FindKernel("LaplacianFilter");
+	//}
 
 	#region Direct Delta Mush implementation
-	private Func<Vector3[], int[,], Vector3[]> GetSmoothFilter()
-	{
-		if (weightedSmooth)
-			return SmoothFilter.distanceWeightedLaplacianFilter;
-		else
-			return SmoothFilter.laplacianFilter;
-	}
+	//private Func<Vector3[], int[,], Vector3[]> GetSmoothFilter()
+	//{
+	//	if (weightedSmooth)
+	//		return SmoothFilter.distanceWeightedLaplacianFilter;
+	//	else
+	//		return SmoothFilter.laplacianFilter;
+	//}
 
-	private static Vector3[] GetSmoothDeltas(Vector3[] vertices, int[,] adjacencyMatrix, Func<Vector3[], int[,], Vector3[]> filter, int iterations)
-	{
-		var smoothVertices = new Vector3[vertices.Length];
-		for (int i = 0; i < vertices.Length; i++)
-			smoothVertices[i] = vertices[i];
+	//private static Vector3[] GetSmoothDeltas(Vector3[] vertices, int[,] adjacencyMatrix, Func<Vector3[], int[,], Vector3[]> filter, int iterations)
+	//{
+	//	var smoothVertices = new Vector3[vertices.Length];
+	//	for (int i = 0; i < vertices.Length; i++)
+	//		smoothVertices[i] = vertices[i];
 
-		for (int i = 0; i < iterations; i++)
-			smoothVertices = filter(smoothVertices, adjacencyMatrix);
+	//	for (int i = 0; i < iterations; i++)
+	//		smoothVertices = filter(smoothVertices, adjacencyMatrix);
 
-		var delta = new Vector3[vertices.Length];
-		for (int i = 0; i < vertices.Length; i++)
-			delta[i] = vertices[i] - smoothVertices[i];
+	//	var delta = new Vector3[vertices.Length];
+	//	for (int i = 0; i < vertices.Length; i++)
+	//		delta[i] = vertices[i] - smoothVertices[i];
 
-		return delta;
-	}
+	//	return delta;
+	//}
 
 	void UpdateMeshOnCPU()
 	{
-		Matrix4x4[] boneMatrices = new Matrix4x4[skin.bones.Length];
-#if WITH_SCALE_MATRIX
-		Matrix4x4[] scaleMatrices = new Matrix4x4[skin.bones.Length];
-#endif // WITH_SCALE_MATRIX
-		for (int i = 0; i < boneMatrices.Length; i++)
-		{
-			Matrix4x4 localToWorld = skin.bones[i].localToWorldMatrix;
-			Matrix4x4 bindPose = mesh.bindposes[i];
-#if WITH_SCALE_MATRIX
-			Vector3 localScale = localToWorld.lossyScale;
-			Vector3 bpScale = bindPose.lossyScale;
-
-			localToWorld.SetColumn(0, localToWorld.GetColumn(0) / localScale.x);
-			localToWorld.SetColumn(1, localToWorld.GetColumn(1) / localScale.y);
-			localToWorld.SetColumn(2, localToWorld.GetColumn(2) / localScale.z);
-			bindPose.SetColumn(0, bindPose.GetColumn(0) / bpScale.x);
-			bindPose.SetColumn(1, bindPose.GetColumn(1) / bpScale.y);
-			bindPose.SetColumn(2, bindPose.GetColumn(2) / bpScale.z);
-
-			//scaleMatrices[i] = Matrix4x4.Scale(localScale) * Matrix4x4.Scale(bindPose.MultiplyVector(bpScale));
-			scaleMatrices[i] = Matrix4x4.Scale(localScale) * Matrix4x4.Scale(bpScale);
-#endif // WITH_SCALE_MATRIX
-			boneMatrices[i] = localToWorld * bindPose;
-		}
+		Matrix4x4[] boneMatrices = GenerateBoneMatrices();
 
 		//Debug.Log(boneMatrices[1]);
 
@@ -536,44 +496,66 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 	{
 		int threadGroupsX = (mesh.vertices.Length + computeThreadGroupSizeX - 1) / computeThreadGroupSizeX;
 
-		Matrix4x4[] boneMatrices = new Matrix4x4[skin.bones.Length];
-		for (int i = 0; i < boneMatrices.Length; i++)
-			boneMatrices[i] = skin.bones[i].localToWorldMatrix * mesh.bindposes[i];
+		Matrix4x4[] boneMatrices = GenerateBoneMatrices();
+
 		bonesCB.SetData(boneMatrices);
-		computeShader.SetBool("DeltaPass", false);
 		computeShader.SetBuffer(deformKernel, "Bones", bonesCB);
-		computeShader.SetBuffer(deformKernel, "Vertices", verticesCB);
-		computeShader.SetBuffer(deformKernel, "Normals", normalsCB);
-		computeShader.SetBuffer(deformKernel, "Output", outputCB[0]);
+		//computeShader.SetBuffer(deformKernel, "Vertices", verticesCB);
+		//computeShader.SetBuffer(deformKernel, "Normals", normalsCB);
+		//computeShader.SetBuffer(deformKernel, "Output", outputCB);
 		computeShader.Dispatch(deformKernel, threadGroupsX, 1, 1);
-		ductTapedMaterial.SetBuffer("Vertices", outputCB[0]);
+		ductTapedMaterial.SetBuffer("Vertices", outputCB);
 
-		computeShader.SetBool("DeltaPass", true);
-		computeShader.SetBuffer(deformKernel, "Vertices", deltavCB);
-		computeShader.SetBuffer(deformKernel, "Normals", deltanCB);
-		computeShader.SetBuffer(deformKernel, "Output", outputCB[2]);
-		computeShader.Dispatch(deformKernel, threadGroupsX, 1, 1);
+		//for (int i = 0; i < iterations; i++)
+		//{
+		//	laplacianKernel = GetSmoothKernel();
+		//	computeShader.SetBuffer(laplacianKernel, "Adjacency", adjacencyCB);
+		//	computeShader.SetInt("AdjacentNeighborCount", adjacencyMatrix.GetLength(1));
 
-		for (int i = 0; i < iterations; i++)
-		{
-			laplacianKernel = GetSmoothKernel();
-			computeShader.SetBuffer(laplacianKernel, "Adjacency", adjacencyCB);
-			computeShader.SetInt("AdjacentNeighborCount", adjacencyMatrix.GetLength(1));
+		//	bool lastIteration = i == iterations - 1;
+		//	if (lastIteration)
+		//	{
+		//		computeShader.SetBuffer(laplacianKernel, "Delta", outputCB[2]);
+		//		ductTapedMaterial.SetBuffer("Vertices", outputCB[(i + 1) % 2]);
+		//	}
+		//	//computeShader.SetBuffer(laplacianKernel, "Delta", outputCB[2]);
 
-			bool lastIteration = i == iterations - 1;
-			if (lastIteration)
-			{
-				computeShader.SetBuffer(laplacianKernel, "Delta", outputCB[2]);
-				ductTapedMaterial.SetBuffer("Vertices", outputCB[(i + 1) % 2]);
-			}
-			//computeShader.SetBuffer(laplacianKernel, "Delta", outputCB[2]);
-
-			computeShader.SetBool("DeltaPass", lastIteration && !disableDeltaPass);
-			computeShader.SetBuffer(laplacianKernel, "Input", outputCB[i % 2]);
-			computeShader.SetBuffer(laplacianKernel, "Output", outputCB[(i + 1) % 2]);
-			computeShader.Dispatch(laplacianKernel, threadGroupsX, 1, 1);
-		}
+		//	computeShader.SetBool("DeltaPass", lastIteration && !disableDeltaPass);
+		//	computeShader.SetBuffer(laplacianKernel, "Input", outputCB[i % 2]);
+		//	computeShader.SetBuffer(laplacianKernel, "Output", outputCB[(i + 1) % 2]);
+		//	computeShader.Dispatch(laplacianKernel, threadGroupsX, 1, 1);
+		//}
 	}
+
+	Matrix4x4[] GenerateBoneMatrices()
+    {
+		Matrix4x4[] boneMatrices = new Matrix4x4[skin.bones.Length];
+#if WITH_SCALE_MATRIX
+		Matrix4x4[] scaleMatrices = new Matrix4x4[skin.bones.Length];
+#endif // WITH_SCALE_MATRIX
+		for (int i = 0; i < boneMatrices.Length; i++)
+		{
+			Matrix4x4 localToWorld = skin.bones[i].localToWorldMatrix;
+			Matrix4x4 bindPose = mesh.bindposes[i];
+#if WITH_SCALE_MATRIX
+			Vector3 localScale = localToWorld.lossyScale;
+			Vector3 bpScale = bindPose.lossyScale;
+
+			localToWorld.SetColumn(0, localToWorld.GetColumn(0) / localScale.x);
+			localToWorld.SetColumn(1, localToWorld.GetColumn(1) / localScale.y);
+			localToWorld.SetColumn(2, localToWorld.GetColumn(2) / localScale.z);
+			bindPose.SetColumn(0, bindPose.GetColumn(0) / bpScale.x);
+			bindPose.SetColumn(1, bindPose.GetColumn(1) / bpScale.y);
+			bindPose.SetColumn(2, bindPose.GetColumn(2) / bpScale.z);
+
+			//scaleMatrices[i] = Matrix4x4.Scale(localScale) * Matrix4x4.Scale(bindPose.MultiplyVector(bpScale));
+			scaleMatrices[i] = Matrix4x4.Scale(localScale) * Matrix4x4.Scale(bpScale);
+#endif // WITH_SCALE_MATRIX
+			boneMatrices[i] = localToWorld * bindPose;
+		}
+		return boneMatrices;
+	}
+
 #endregion
 
 
