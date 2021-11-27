@@ -293,15 +293,19 @@ public class DDMUtilsIterative
 					break;
 				}
 				DenseMatrix omega = omegas[vi, bi];
-				float sum = 0.0f;
+				bool skip = true;
 				for(int row = 0; row < 4; ++row)
 				{
 					for (int col = 0; col < 4; ++col)
 					{
-						sum += omega[row, col];
+						if(Math.Abs(omega[row, col]) > 1e-6)
+                        {
+							skip = false;
+							break;
+                        }
 					}
                 }
-				if (sum < 1e-6)
+				if (skip)
                 {
 					continue;
                 }
