@@ -60,7 +60,7 @@ public class MeshUtils// : MonoBehaviour
 					var dz = v[u].z - v[j].z;
 					//if (Vector3.Distance(v[i], v[j]) < minDistance) // 2794ms
 					//if ((v[j] - v[i]).sqrMagnitude < minSqrDistance) // 2796ms
-					if (dx*dx+dy*dy+dz*dz < minSqrDistance) // 687ms
+					if (dx*dx+dy*dy+dz*dz <= minSqrDistance) // 687ms
 					{
 						if (mapToUnique[i] == -1)
 							mapToUnique[i] = u; // found new unique vertex

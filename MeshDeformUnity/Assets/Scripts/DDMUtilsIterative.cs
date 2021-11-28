@@ -298,7 +298,7 @@ public class DDMUtilsIterative
 				{
 					for (int col = 0; col < 4; ++col)
 					{
-						if(Math.Abs(omega[row, col]) > 1e-6)
+						if(Math.Abs(omega[row, col]) > 1e-6f)
                         {
 							skip = false;
 							break;
