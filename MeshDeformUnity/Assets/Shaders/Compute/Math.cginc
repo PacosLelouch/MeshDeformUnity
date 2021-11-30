@@ -2,11 +2,6 @@
 #define MATH_INCLUDED
 
 #define EPSILON 1.19209e-07
-#define ZERO_VECTOR_3 float3(0, 0, 0)
-#define ZERO_VECTOR_4 float4(0, 0, 0, 0)
-#define ZERO_MATRIX_3 float3x3(0, 0, 0, 0, 0, 0, 0, 0, 0)
-#define ZERO_MATRIX_4 float4x4(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-#define IDENTITY_MATRIX_4 float4x4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
 
 float2x2 G2(float c, float s)
 {

@@ -9,8 +9,10 @@ using MathNet.Numerics.LinearAlgebra.Single;
 using MathNet.Numerics.LinearAlgebra.Solvers;
 
 //[ExecuteInEditMode]
-public class DirectDeltaMushSkinnedMesh : MonoBehaviour
+public class DDMSkinnedMeshGPU : MonoBehaviour
 {
+	public ComputeShader precomputeShader;
+
 	public int iterations = 2;
 
 	public float translationSmooth = 0.9f; 
@@ -77,6 +79,10 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 	internal ComputeBuffer omegasCB; // float4x4 * 4
 	internal ComputeBuffer outputCB; // float3 + float3
 
+	//////
+	internal ComputeBuffer laplacianCB;
+	//////
+
 	internal Material ductTapedMaterial;
 
 	internal const int maxOmegaCount = 16;
@@ -92,7 +98,12 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 		//B.At(0, 1, 1.0f);
 		//Debug.Log("B:" + B);
 		//// End Test Math.NET
+		Debug.Assert(SystemInfo.supportsComputeShaders && computeShader != null);
 
+		if (precomputeShader)
+		{
+			precomputeShader = Instantiate(precomputeShader);
+		}
 		if (computeShader)
 		{
 			computeShader = Instantiate(computeShader);
@@ -108,67 +119,67 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 		// Store matrix to Math.NET matrix.
 		int vCount = mesh.vertexCount;
 		int bCount = skin.bones.Length;
-		SparseMatrix lapl = MeshUtils.BuildLaplacianMatrixFromAdjacentMatrix(vCount, adjacencyMatrix, true, weightedSmooth);
+
+		//SparseMatrix lapl = MeshUtils.BuildLaplacianMatrixFromAdjacentMatrix(vCount, adjacencyMatrix, true, weightedSmooth);
 		//SparseMatrix B = MeshUtils.BuildSmoothMatrixFromLaplacian(lapl, translationSmooth, iterations);
 		//SparseMatrix C = MeshUtils.BuildSmoothMatrixFromLaplacian(lapl, rotationSmooth, iterations);
 
-		DenseMatrix V = new DenseMatrix(vCount, 3);
-		Vector3[] vs = mesh.vertices;
-		for (int i = 0; i < vCount; ++i)
-        {
-			Vector3 v = vs[i];
-			V[i, 0] = v.x;
-			V[i, 1] = v.y;
-			V[i, 2] = v.z;
-		}
+		//DenseMatrix V = new DenseMatrix(vCount, 3);
+		//Vector3[] vs = mesh.vertices;
+		//for (int i = 0; i < vCount; ++i)
+  //      {
+		//	Vector3 v = vs[i];
+		//	V[i, 0] = v.x;
+		//	V[i, 1] = v.y;
+		//	V[i, 2] = v.z;
+		//}
 
-		DenseMatrix W = new DenseMatrix(vCount, bCount);
+		//DenseMatrix W = new DenseMatrix(vCount, bCount);
 
 		BoneWeight[] bws = mesh.boneWeights;
-		for (int i = 0; i < vCount; ++i)
-		{
-			BoneWeight w = bws[i];
-			if (w.boneIndex0 >= 0 && w.weight0 > 0.0f)
-			{
-				W[i, w.boneIndex0] = w.weight0;
-			}
-			if (w.boneIndex1 >= 0 && w.weight1 > 0.0f)
-			{
-				W[i, w.boneIndex1] = w.weight1;
-			}
-			if (w.boneIndex2 >= 0 && w.weight2 > 0.0f)
-			{
-				W[i, w.boneIndex2] = w.weight2;
-			}
-			if (w.boneIndex3 >= 0 && w.weight3 > 0.0f)
-			{
-				W[i, w.boneIndex3] = w.weight3;
-			}
-		}
+		//for (int i = 0; i < vCount; ++i)
+		//{
+		//	BoneWeight w = bws[i];
+		//	if (w.boneIndex0 >= 0 && w.weight0 > 0.0f)
+		//	{
+		//		W[i, w.boneIndex0] = w.weight0;
+		//	}
+		//	if (w.boneIndex1 >= 0 && w.weight1 > 0.0f)
+		//	{
+		//		W[i, w.boneIndex1] = w.weight1;
+		//	}
+		//	if (w.boneIndex2 >= 0 && w.weight2 > 0.0f)
+		//	{
+		//		W[i, w.boneIndex2] = w.weight2;
+		//	}
+		//	if (w.boneIndex3 >= 0 && w.weight3 > 0.0f)
+		//	{
+		//		W[i, w.boneIndex3] = w.weight3;
+		//	}
+		//}
 
-		SparseMatrix I = SparseMatrix.CreateIdentity(vCount);
-		ddmUtils = new DDMUtilsIterative();//new DDMUtils();
-		ddmUtils.dm_blend = dm_blend;
-		ddmUtils.n = vCount;
-		ddmUtils.num_transforms = bCount;
-		ddmUtils.B = iterations == 0 ? I : I - (translationSmooth) * lapl; //(translationSmooth / iterations) * lapl;//B;
-		ddmUtils.C = iterations == 0 ? I : I - (rotationSmooth) * lapl; //(rotationSmooth / iterations) * lapl;//C;
-		ddmUtils.V = V;
-		ddmUtils.W = W;
+		//SparseMatrix I = SparseMatrix.CreateIdentity(vCount);
+		//ddmUtils = new DDMUtilsIterative();//new DDMUtils();
+		//ddmUtils.dm_blend = dm_blend;
+		//ddmUtils.n = vCount;
+		//ddmUtils.num_transforms = bCount;
+		//ddmUtils.B = iterations == 0 ? I : I - (translationSmooth) * lapl; //(translationSmooth / iterations) * lapl;//B;
+		//ddmUtils.C = iterations == 0 ? I : I - (rotationSmooth) * lapl; //(rotationSmooth / iterations) * lapl;//C;
+		//ddmUtils.V = V;
+		//ddmUtils.W = W;
 
-		ddmUtils.translationSmooth = translationSmooth;
-		ddmUtils.rotationSmooth = rotationSmooth;
+		//ddmUtils.translationSmooth = translationSmooth;
+		//ddmUtils.rotationSmooth = rotationSmooth;
 
-		ddmUtils.InitCache();
+		//ddmUtils.InitCache();
 
-		omegas = ddmUtils.ComputeOmegas(vCount, bCount, iterations);
-		//TODO: Precompute others.
+		//omegas = ddmUtils.ComputeOmegas(vCount, bCount, iterations);
 
 		// Compute
-		if (SystemInfo.supportsComputeShaders && computeShader && ductTapedShader)
+		if (computeShader && ductTapedShader)
 		{
 			//Matrix4x4[,] compressedOmegas = DDMUtilsIterative.CompressOmegas2D(omegas, bws);
-			DDMUtilsIterative.OmegaWithIndex[,] convertedOmegas = DDMUtilsIterative.ConvertOmegas1D(omegas, maxOmegaCount);
+			//DDMUtilsIterative.OmegaWithIndex[,] convertedOmegas = DDMUtilsIterative.ConvertOmegas1D(omegas, maxOmegaCount);
 
 			verticesCB = new ComputeBuffer(vCount, 3 * sizeof(float));
 			normalsCB = new ComputeBuffer(vCount, 3 * sizeof(float));
@@ -181,7 +192,7 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 			//omegasCB = new ComputeBuffer(vCount, 16 * sizeof(float) * 4);
 			//omegasCB.SetData(compressedOmegas);
 			omegasCB = new ComputeBuffer(vCount * maxOmegaCount, (10 * sizeof(float) + sizeof(int)));
-			omegasCB.SetData(convertedOmegas);
+			//omegasCB.SetData(convertedOmegas);
 
 			outputCB = new ComputeBuffer(vCount, 6 * sizeof(float));
 
@@ -202,31 +213,22 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 			ductTapedMaterial.CopyPropertiesFromMaterial(skin.sharedMaterial);
 		}
 		else
+		{
 			useCompute = false;
+		}
 
-		//UpdateDeltaVectors();
 
-		//// Experiment with blending bone weights
-		//prefilteredBoneWeights = new float[mesh.vertexCount, skin.bones.Length];
-		//for (int i = 0; i < mesh.vertexCount; ++i)
-		//{
-		//	prefilteredBoneWeights[i, bw[i].boneIndex0] = bw[i].weight0;
-		//	prefilteredBoneWeights[i, bw[i].boneIndex1] = bw[i].weight1;
-		//	prefilteredBoneWeights[i, bw[i].boneIndex2] = bw[i].weight2;
-		//	prefilteredBoneWeights[i, bw[i].boneIndex3] = bw[i].weight3;
-		//}
-		//for (int i = 0; i < iterations; i++)
-		//	prefilteredBoneWeights = SmoothFilter.distanceWeightedLaplacianFilter(mesh.vertices, prefilteredBoneWeights, adjacencyMatrix);
+		DDMUtilsGPU.computeLaplacianCBFromAdjacency(
+			ref laplacianCB, precomputeShader, adjacencyMatrix);
+		DDMUtilsGPU.computeOmegasCBFromLaplacianCB(
+			ref omegasCB, precomputeShader,
+			verticesCB, laplacianCB, weightsCB, 
+			bCount, iterations, translationSmooth);
 
-		//var boneCount = skin.bones.Length;
-		//for (int i = 0; i < mesh.vertexCount; ++i)
-		//{
-		//	float l = 0.0f;
-		//	for (int b = 0; b < boneCount; ++b)
-		//		l += prefilteredBoneWeights[i, b];
-		//	for (int b = 0; b < boneCount; ++b)
-		//		prefilteredBoneWeights[i, b] += prefilteredBoneWeights[i, b] * (1.0f - l);
-		//}
+		if(!useCompute)
+        {
+			//TODO
+        }
 	}
 
 	void OnDestroy()
@@ -240,6 +242,8 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 		bonesCB.Release();
 		omegasCB.Release();
 		outputCB.Release();
+
+		laplacianCB.Release();
 	}
 
 	void LateUpdate()
@@ -248,8 +252,8 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 
 		if (actuallyUseCompute)
 			UpdateMeshOnGPU();
-		else
-			UpdateMeshOnCPU();
+		//else
+		//	UpdateMeshOnCPU();
 
 		if (compareWithSkinning)
 			DrawVerticesVsSkin();

@@ -189,15 +189,15 @@ public class DDMUtilsIterative
 		DenseVector vertex = new DenseVector(4);
 		DenseMatrix tmpOmega = new DenseMatrix(4);
 		for (int vi = 0; vi < vCount; ++vi)
-        {
-			for(int bi = 0; bi < bCount; ++bi)
+		{
+			vertex[0] = V[vi, 0];
+			vertex[1] = V[vi, 1];
+			vertex[2] = V[vi, 2];
+			vertex[3] = 1.0f;
+			vertex.OuterProduct(vertex, tmpOmega);
+			for (int bi = 0; bi < bCount; ++bi)
 			{
 				DenseMatrix omega = new DenseMatrix(4);
-				vertex[0] = V[vi, 0];
-				vertex[1] = V[vi, 1];
-				vertex[2] = V[vi, 2];
-				vertex[3] = 1.0f;
-				vertex.OuterProduct(vertex, tmpOmega);
 				omega += W[vi, bi] * tmpOmega;
 				omegas[vi, bi] = omega;
 			}				
