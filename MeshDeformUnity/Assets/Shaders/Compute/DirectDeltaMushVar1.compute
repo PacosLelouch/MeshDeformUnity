@@ -1,0 +1,187 @@
+﻿#pragma kernel DeformMesh
+#define THREAD_GROUP_SIZE_X 256
+#define MAX_OMEGA_COUNT 16
+
+#include "Math.cginc"
+
+struct BoneWeights
+{
+	float4 weights;
+	int4 indices;
+};
+
+//struct OmegaStruct
+//{
+//	float4x4 x;
+//	float4x4 y;
+//	float4x4 z;
+//	float4x4 w;
+//};
+struct OmegaStructWithIndex
+{
+	float m0;
+	float2 m1;
+	float3 m2;
+	float4 m3;
+	int boneIndex;
+};
+
+struct CompressedPpp
+{
+	float m0;
+	float2 m1;
+	float3 m2;
+};
+
+struct OutputVertex
+{
+    float3 pos;
+    float3 normal;
+};
+
+// input
+StructuredBuffer<float3> Vertices;
+StructuredBuffer<float3> Normals;
+StructuredBuffer<BoneWeights> Weights;
+StructuredBuffer<float4x4> Bones;
+//StructuredBuffer<OmegaStruct> Omegas;
+StructuredBuffer<OmegaStructWithIndex> Omegas;
+StructuredBuffer<CompressedPpp> Ppps;
+
+int VertexCount;
+
+//StructuredBuffer<OutputVertex> Input;
+
+// output
+RWStructuredBuffer<OutputVertex> Output;
+
+void DecomposeMat(in float4x4 mat, out float3x3 Q, out float3 p, out float3 q)
+{
+	Q[0][0] = mat[0][0];
+	Q[0][1] = mat[0][1];
+	Q[0][2] = mat[0][2];
+	Q[1][0] = mat[1][0];
+	Q[1][1] = mat[1][1];
+	Q[1][2] = mat[1][2];
+	Q[2][0] = mat[2][0];
+	Q[2][1] = mat[2][1];
+	Q[2][2] = mat[2][2];
+
+	p[0] = mat[3][0];
+	p[1] = mat[3][1];
+	p[2] = mat[3][2];
+
+	q[0] = mat[0][3];
+	q[1] = mat[1][3];
+	q[2] = mat[2][3];
+}
+
+void get_inv_and_trans_with_det(in float3x3 mat, out float3x3 res)
+{
+	res[0][0] = (mat[1][1] * mat[2][2] - mat[1][2] * mat[2][1]);
+	res[0][1] = -(mat[1][0] * mat[2][2] - mat[1][2] * mat[2][0]);
+	res[0][2] = (mat[1][0] * mat[2][1] - mat[1][1] * mat[2][0]);
+	res[1][0] = -(mat[0][1] * mat[2][2] - mat[0][2] * mat[2][1]);
+	res[1][1] = (mat[0][0] * mat[2][2] - mat[0][2] * mat[2][0]);
+	res[1][2] = -(mat[0][0] * mat[2][1] - mat[0][1] * mat[2][0]);
+	res[2][0] = (mat[0][1] * mat[1][2] - mat[0][2] * mat[1][1]);
+	res[2][1] = -(mat[0][0] * mat[1][2] - mat[0][2] * mat[1][0]);
+	res[2][2] = (mat[0][0] * mat[1][1] - mat[0][1] * mat[1][0]);
+}
+
+[numthreads(THREAD_GROUP_SIZE_X, 1, 1)]
+void DeformMesh(uint3 groupID : SV_GroupID, uint3 groupThreadID : SV_GroupThreadID)
+{
+	int idx = THREAD_GROUP_SIZE_X * groupID.x + groupThreadID.x;
+	if (idx >= VertexCount)
+		return;
+
+	float3 pos = Vertices[idx];
+	float3 normal = Normals[idx];
+	int4 boneIndices = Weights[idx].indices;
+	float4 boneWeights = Weights[idx].weights;
+	//OmegaStruct omega = Omegas[idx];
+
+	//float4x4 mat = boneIndices.x >= 0 && boneWeights.x > 0. ? Bones[boneIndices.x] * omega.x : IDENTITY_MATRIX_4;
+	//if (boneIndices.y >= 0 && boneWeights.y > 0.)
+	//{
+	//	mat += Bones[boneIndices.y] * omega.y;
+	//}
+	//if (boneIndices.z >= 0 && boneWeights.z > 0.)
+	//{
+	//	mat += Bones[boneIndices.z] * omega.z;
+	//}
+	//if (boneIndices.w >= 0 && boneWeights.w > 0.)
+	//{
+	//	mat += Bones[boneIndices.w] * omega.w;
+	//}
+	float4x4 mat = IDENTITY_MATRIX_4;
+	OmegaStructWithIndex oswi0 = Omegas[idx * MAX_OMEGA_COUNT];
+	if (oswi0.boneIndex >= 0)
+	{
+		float4x4 omega0 = float4x4(
+			oswi0.m0,   oswi0.m1.x, oswi0.m2.x, oswi0.m3.x,
+			oswi0.m1.x, oswi0.m1.y, oswi0.m2.y, oswi0.m3.y,
+			oswi0.m2.x, oswi0.m2.y, oswi0.m2.z, oswi0.m3.z,
+			oswi0.m3.x, oswi0.m3.y, oswi0.m3.z, oswi0.m3.w);
+		mat = mul(Bones[oswi0.boneIndex], omega0);
+		for (int i = 1; i < MAX_OMEGA_COUNT; ++i)
+		{
+			OmegaStructWithIndex oswi = Omegas[idx * MAX_OMEGA_COUNT + i];
+			if (oswi.boneIndex < 0)
+			{
+				break;
+			}
+			float4x4 omega = float4x4(
+				oswi.m0,   oswi.m1.x, oswi.m2.x, oswi.m3.x,
+				oswi.m1.x, oswi.m1.y, oswi.m2.y, oswi.m3.y,
+				oswi.m2.x, oswi.m2.y, oswi.m2.z, oswi.m3.z,
+				oswi.m3.x, oswi.m3.y, oswi.m3.z, oswi.m3.w);
+			mat += mul(Bones[oswi.boneIndex], omega);
+		}
+	}
+	
+	CompressedPpp P_pp_comp = Ppps[idx];
+	float3x3 P_pp = float3x3(
+		P_pp_comp.m0, P_pp_comp.m1.x, P_pp_comp.m2.x,
+		P_pp_comp.m1.x, P_pp_comp.m1.y, P_pp_comp.m2.y,
+		P_pp_comp.m2.x, P_pp_comp.m2.y, P_pp_comp.m2.z);
+
+	//TODO: Bug?
+
+	float3x3 Q = ZERO_MATRIX_3;
+	float3 p = ZERO_VECTOR_3;
+	float3 q = ZERO_VECTOR_3;
+	DecomposeMat(mat, Q, p, q);
+
+	float3x3 M = Q - Math_OutProduct(q, p);
+	//float3x3 U = ZERO_MATRIX_3;
+	//float3x3 V = ZERO_MATRIX_3;
+	//float3 D = ZERO_VECTOR_3;
+	//GetSVD3D(M, U, D, V);
+
+	//float3x3 R = mul(U, transpose(V));
+
+	float3x3 temp = ZERO_MATRIX_3;
+	get_inv_and_trans_with_det(M, temp);
+	
+	float3x3 R = mul(temp, P_pp);
+
+	float3 t = q - mul(R, p);
+
+	//float4x4 gamma = float4x4(
+	//	R[0][0], R[1][0], R[2][0], t[0],
+	//	R[0][1], R[1][1], R[2][1], t[1],
+	//	R[0][2], R[1][2], R[2][2], t[2],
+	//	0., 0., 0., 1.
+	//	);
+	float4x4 gamma = float4x4(
+		R[0][0], R[0][1], R[0][2], t[0],
+		R[1][0], R[1][1], R[1][2], t[1],
+		R[2][0], R[2][1], R[2][2], t[2],
+		0., 0., 0., 1.
+		);
+
+	Output[idx].pos		= mul(gamma, float4(pos, 1.)).xyz;
+	Output[idx].normal	= mul(gamma, float4(normal, 0.)).xyz;
+}

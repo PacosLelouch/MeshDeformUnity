@@ -13,6 +13,13 @@ public class DDMUtilsIterative
 		public int boneIndex;
     }
 
+	public struct CompressedPpp
+	{
+		public float m00;
+		public float m01; public float m11;
+		public float m02; public float m12; public float m22;
+	}
+
 	public int n;
 	public float dm_blend;
 	public int num_transforms;
@@ -328,6 +335,24 @@ public class DDMUtilsIterative
 			}
 		}
 		return outOmegas;
+	}
+
+	static public CompressedPpp[] ConvertPpp(DenseMatrix[] P_pps)
+	{
+		int vCount = P_pps.GetLength(0);
+		CompressedPpp[] res = new CompressedPpp[vCount];
+		for (int vi = 0; vi < vCount; ++vi)
+		{
+			DenseMatrix P_pp = P_pps[vi];
+
+			res[vi].m00 = P_pp[0, 0];
+			res[vi].m01 = P_pp[0, 1];
+			res[vi].m11 = P_pp[1, 1];
+			res[vi].m02 = P_pp[0, 2];
+			res[vi].m12 = P_pp[1, 2];
+			res[vi].m22 = P_pp[2, 2];
+		}
+		return res;
 	}
 
 	static public Matrix4x4[,] ConvertOmegas2D(DenseMatrix[,] omegas)
