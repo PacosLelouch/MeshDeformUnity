@@ -1,30 +1,8 @@
 ﻿#pragma kernel DeformMesh
 #define THREAD_GROUP_SIZE_X 256
-#define MAX_OMEGA_COUNT 16
 
 #include "Math.cginc"
-
-struct BoneWeights
-{
-	float4 weights;
-	int4 indices;
-};
-
-//struct OmegaStruct
-//{
-//	float4x4 x;
-//	float4x4 y;
-//	float4x4 z;
-//	float4x4 w;
-//};
-struct OmegaStructWithIndex
-{
-	float m0;
-	float2 m1;
-	float3 m2;
-	float4 m3;
-	int boneIndex;
-};
+#include "DeltaMushCommon.cginc"
 
 struct CompressedPpp
 {
