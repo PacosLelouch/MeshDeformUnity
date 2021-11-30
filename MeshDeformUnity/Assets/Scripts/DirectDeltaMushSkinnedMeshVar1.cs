@@ -9,7 +9,7 @@ using MathNet.Numerics.LinearAlgebra.Single;
 using MathNet.Numerics.LinearAlgebra.Solvers;
 
 //[ExecuteInEditMode]
-public class DirectDeltaMushSkinnedMesh : MonoBehaviour
+public class DirectDeltaMushSkinnedMeshVar1 : MonoBehaviour
 {
 	public int iterations = 2;
 
@@ -61,6 +61,8 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 	internal DenseMatrix[,] omegas;
 	internal DDMUtilsIterative ddmUtils;
 
+	internal DenseMatrix[] P_pps;
+
 	// Compute
 	//[HideInInspector]
 	public Shader ductTapedShader;
@@ -76,6 +78,8 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 	internal ComputeBuffer bonesCB; // float4x4
 	internal ComputeBuffer omegasCB; // float4x4 * 4
 	internal ComputeBuffer outputCB; // float3 + float3
+
+	internal ComputeBuffer pppsCB; // float3x3
 
 	internal Material ductTapedMaterial;
 
@@ -151,8 +155,6 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 		ddmUtils.dm_blend = dm_blend;
 		ddmUtils.n = vCount;
 		ddmUtils.num_transforms = bCount;
-		//ddmUtils.B = iterations == 0 ? I : I - (translationSmooth / iterations) * lapl;//B;
-		//ddmUtils.C = iterations == 0 ? I : I - (rotationSmooth / iterations) * lapl;//C;
 		ddmUtils.B = iterations == 0 ? I : I - (translationSmooth) * lapl;//B;
 		ddmUtils.C = iterations == 0 ? I : I - (rotationSmooth) * lapl;//C;
 		ddmUtils.V = V;
@@ -165,6 +167,38 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 
 		omegas = ddmUtils.ComputeOmegas(vCount, bCount, iterations);
 		//TODO: Precompute others.
+		// Variant 1
+		P_pps = new DenseMatrix[vCount];
+		for (int vi = 0; vi < mesh.vertexCount; ++vi)
+        {
+			DenseMatrix mat4 = new DenseMatrix(4);
+			for (int bi = 0; bi < bCount; ++bi)
+			{
+				mat4 += omegas[vi, bi];
+			}
+			DenseMatrix Pi = new DenseMatrix(3);
+			for (int row = 0; row < 3; ++row)
+			{
+				for (int col = 0; col < 3; ++col)
+				{
+					Pi[row, col] = mat4[row, col];
+				}
+			}
+
+			DenseVector pi = new DenseVector(3);
+			pi[0] = mat4[3, 0];
+			pi[1] = mat4[3, 1];
+			pi[2] = mat4[3, 2];
+
+			DenseMatrix pi_piT = new DenseMatrix(3);
+			pi.OuterProduct(pi, pi_piT);
+			DenseMatrix Pi_pipi = Pi - pi_piT;
+
+			float det = Pi_pipi.Determinant();
+			//Debug.Log("P_pps:" + det);
+			P_pps[vi] = (DenseMatrix)Pi_pipi.Divide(det);
+			//P_pps[vi] = Pi_pipi;
+		}
 
 		// Compute
 		if (SystemInfo.supportsComputeShaders && computeShader && ductTapedShader)
@@ -185,6 +219,10 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 			omegasCB = new ComputeBuffer(vCount * maxOmegaCount, (10 * sizeof(float) + sizeof(int)));
 			omegasCB.SetData(convertedOmegas);
 
+			DDMUtilsIterative.CompressedPpp[] P_pps_comp = DDMUtilsIterative.ConvertPpp(P_pps);
+			pppsCB = new ComputeBuffer(vCount, 6 * sizeof(float));
+			pppsCB.SetData(P_pps_comp);
+
 			outputCB = new ComputeBuffer(vCount, 6 * sizeof(float));
 
 			deformKernel = computeShader.FindKernel("DeformMesh");
@@ -193,6 +231,7 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 			computeShader.SetBuffer(deformKernel, "Weights", weightsCB);
 			computeShader.SetBuffer(deformKernel, "Bones", bonesCB);
 			computeShader.SetBuffer(deformKernel, "Omegas", omegasCB);
+			computeShader.SetBuffer(deformKernel, "Ppps", pppsCB);
 			computeShader.SetBuffer(deformKernel, "Output", outputCB);
 			computeShader.SetInt("VertexCount", vCount);
 
@@ -241,6 +280,7 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 		weightsCB.Release();
 		bonesCB.Release();
 		omegasCB.Release();
+		pppsCB.Release();
 		outputCB.Release();
 	}
 
@@ -440,29 +480,36 @@ public class DirectDeltaMushSkinnedMesh : MonoBehaviour
 			//float detM = M.Determinant();
 			//if(true)//(Math.Abs(detM) >= 1e-4f)
 			//{
-				var SVD = M.Svd(true);
-				DenseMatrix U = (DenseMatrix)SVD.U;
-				DenseMatrix VT = (DenseMatrix)SVD.VT;
-				DenseMatrix R = U * VT;
+				//var SVD = M.Svd(true);
+				//DenseMatrix U = (DenseMatrix)SVD.U;
+				//DenseMatrix VT = (DenseMatrix)SVD.VT;
+				//DenseMatrix R = U * VT;
 				//for(int i = 0; i < 3; ++i)
 				//{
 				//	R.SetColumn(i, R.Column(i).Normalize(2d));
 				//}
 
-				DenseVector ti = qi - (R * pi);
+			float det = M.Determinant();
+			M = (DenseMatrix)M.Transpose();
+			M = (DenseMatrix)M.Inverse();
+			M = (DenseMatrix)M.Multiply(det);
 
-				// Get gamma
-				for (int row = 0; row < 3; ++row)
+            DenseMatrix R = M * P_pps[vi];
+
+            DenseVector ti = qi - (R * pi);
+
+			// Get gamma
+			for (int row = 0; row < 3; ++row)
+			{
+				for (int col = 0; col < 3; ++col)
 				{
-					for (int col = 0; col < 3; ++col)
-					{
-						gamma[row, col] = R[row, col];
-					}
+					gamma[row, col] = R[row, col];
 				}
-				gamma[0, 3] = ti[0];
-				gamma[1, 3] = ti[1];
-				gamma[2, 3] = ti[2];
-				gamma[3, 3] = 1.0f;
+			}
+			gamma[0, 3] = ti[0];
+			gamma[1, 3] = ti[1];
+			gamma[2, 3] = ti[2];
+			gamma[3, 3] = 1.0f;
 			//}
 			//         else
 			//         {
