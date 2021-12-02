@@ -2,13 +2,16 @@
 #pragma kernel ComputeOmegasPreStep
 #pragma kernel ComputeOmegasOneSweep
 #pragma kernel CompressOmegas
-#define THREAD_GROUP_SIZE_X 512
+#define THREAD_GROUP_SIZE_X 256
 #define MAX_BONE_COUNT 128
 
 #include "Math.cginc"
 #include "DeltaMushCommon.cginc"
 
 // input
+StructuredBuffer<IndexWeightPair> Laplacian;
+StructuredBuffer<OmegaStructWithIndex> PreOmegas;
+
 StructuredBuffer<float3> Vertices;
 StructuredBuffer<BoneWeights> Weights;
 
@@ -26,6 +29,7 @@ void InitOmegas(uint3 groupID : SV_GroupID, uint3 groupThreadID : SV_GroupThread
 	if (idx >= VertexCount * BoneCount)
 		return;
 	
+	//Omegas[idx] = MatrixToOmegaStructWithIndex(ZERO_MATRIX_4, -1);
 	Omegas[idx].boneIndex = -1;
 }
 
@@ -113,10 +117,6 @@ void ComputeOmegasPreStep(uint3 groupID : SV_GroupID, uint3 groupThreadID : SV_G
 	//}
 }
 
-// input
-StructuredBuffer<IndexWeightPair> Laplacian;
-StructuredBuffer<OmegaStructWithIndex> PreOmegas;
-
 [numthreads(THREAD_GROUP_SIZE_X, 1, 1)]
 void ComputeOmegasOneSweep(uint3 groupID : SV_GroupID, uint3 groupThreadID : SV_GroupThreadID)
 {
@@ -132,20 +132,42 @@ void ComputeOmegasOneSweep(uint3 groupID : SV_GroupID, uint3 groupThreadID : SV_
 		//float4x4 omegaMat = ZERO_MATRIX_4;
 		float weight0 = 1.0 - Lambda;
 		OmegaStructWithIndex preOSWI0 = PreOmegas[vi * BoneCount + bi];
-		float4x4 omegaMat = OmegaStructWithIndexToMatrix(preOSWI0) * weight0;
-
+		int counter = 0;
+		float4x4 omegaMat = ZERO_MATRIX_4;
+		if (preOSWI0.boneIndex >= 0)
+		{
+			counter = 1;
+			omegaMat = OmegaStructWithIndexToMatrix(preOSWI0) * weight0;
+		}
+		// Correct?
 		for (int ai = 0; ai < MAX_OMEGA_COUNT; ++ai)
 		{
 			IndexWeightPair iwp = Laplacian[vi * MAX_OMEGA_COUNT + ai];
+			//if (iwp.weight == 0.0)
+			//{
+			//	break;
+			//}
 			int ki = iwp.index;
+			if (ki < 0)
+			{
+				break;
+			}
 			float weight = -iwp.weight * Lambda;
 			OmegaStructWithIndex preOSWI = PreOmegas[ki * BoneCount + bi];
 			if (preOSWI.boneIndex >= 0)
 			{
+				++counter;
 				omegaMat += OmegaStructWithIndexToMatrix(preOSWI) * weight;
 			}
 		}
-		Omegas[vi * BoneCount + bi] = MatrixToOmegaStructWithIndex(omegaMat, bi);
+		if (counter == 0)
+		{
+			Omegas[vi * BoneCount + bi] = MatrixToOmegaStructWithIndex(ZERO_MATRIX_4, -1);
+		}
+		else
+		{
+			Omegas[vi * BoneCount + bi] = MatrixToOmegaStructWithIndex(omegaMat, bi);
+		}
 	}
 
 }

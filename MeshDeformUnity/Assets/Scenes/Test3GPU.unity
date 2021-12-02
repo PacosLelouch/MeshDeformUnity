@@ -132,11 +132,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 2a6916a570b9b4945b21a2f1246fb224, type: 3}
       propertyPath: m_RootOrder
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 2a6916a570b9b4945b21a2f1246fb224, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -2
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 2a6916a570b9b4945b21a2f1246fb224, type: 3}
       propertyPath: m_LocalPosition.y
@@ -180,7 +180,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 2a6916a570b9b4945b21a2f1246fb224, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2a6916a570b9b4945b21a2f1246fb224, type: 3}
@@ -226,7 +226,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   precomputeShader: {fileID: 7200000, guid: 680b7cfc9b80cf442a97b69b11685165, type: 3}
-  iterations: 2
+  iterations: 20
   translationSmooth: 0.9
   rotationSmooth: 0.9
   dm_blend: 0
@@ -469,6 +469,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: SmoothCylinderNormalize
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 843df82f26a99714bad88beff15ef72e, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 843df82f26a99714bad88beff15ef72e, type: 3}
 --- !u!1 &1658853060 stripped
@@ -489,7 +493,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   precomputeShader: {fileID: 7200000, guid: 680b7cfc9b80cf442a97b69b11685165, type: 3}
-  iterations: 2
+  iterations: 10
   translationSmooth: 0.9
   rotationSmooth: 0.9
   dm_blend: 0

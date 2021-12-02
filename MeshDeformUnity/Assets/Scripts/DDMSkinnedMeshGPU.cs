@@ -81,7 +81,7 @@ public class DDMSkinnedMeshGPU : MonoBehaviour
 
 	//////
 	internal ComputeBuffer laplacianCB;
-	//////
+	//////laplacianCB
 
 	internal Material ductTapedMaterial;
 
@@ -98,7 +98,7 @@ public class DDMSkinnedMeshGPU : MonoBehaviour
 		//B.At(0, 1, 1.0f);
 		//Debug.Log("B:" + B);
 		//// End Test Math.NET
-		Debug.Assert(SystemInfo.supportsComputeShaders && computeShader != null);
+		Debug.Assert(SystemInfo.supportsComputeShaders && computeShader != null && precomputeShader != null);
 
 		if (precomputeShader)
 		{
@@ -217,7 +217,7 @@ public class DDMSkinnedMeshGPU : MonoBehaviour
 			useCompute = false;
 		}
 
-
+		laplacianCB = new ComputeBuffer(vCount * maxOmegaCount, (sizeof(int) + sizeof(float)));
 		DDMUtilsGPU.computeLaplacianCBFromAdjacency(
 			ref laplacianCB, precomputeShader, adjacencyMatrix);
 		DDMUtilsGPU.computeOmegasCBFromLaplacianCB(
