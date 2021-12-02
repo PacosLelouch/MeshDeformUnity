@@ -3,7 +3,7 @@
 #pragma kernel ComputeOmegasOneSweep
 #pragma kernel CompressOmegas
 #define THREAD_GROUP_SIZE_X 256
-#define MAX_BONE_COUNT 128
+#define MAX_BONE_COUNT 256
 
 #include "Math.cginc"
 #include "DeltaMushCommon.cginc"
