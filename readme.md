@@ -23,7 +23,7 @@ Currently a test project with Unity 2020.3.13.
 
 ## For Developers
 
-Scene `Scenes/Test3.unity` for test. 
+Scene `Scenes/Test3GPU.unity` for test. 
 
 
 

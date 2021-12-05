@@ -29,6 +29,7 @@ public class DDMUtilsGPU
         //    laplacianCB.Release();
         //    laplacianCB = null;
         //}
+        UnityEngine.Profiling.Profiler.BeginSample("computeLaplacianCBFromAdjacency");
 
         int vCount = adjacencyMatrix.GetLength(0);
         int aCount = adjacencyMatrix.GetLength(1);
@@ -69,6 +70,7 @@ public class DDMUtilsGPU
         }
         laplacianCB.SetData(indexWeightPairsCPU);
 
+        UnityEngine.Profiling.Profiler.EndSample();
         return true;
     }
 
@@ -89,6 +91,7 @@ public class DDMUtilsGPU
         //    omegasCB.Release();
         //    omegasCB = null;
         //}
+        UnityEngine.Profiling.Profiler.BeginSample("computeOmegasCBFromLaplacianCB");
         int vCount = verticesCB.count;
         int aCount = omegaCount;
 
@@ -182,6 +185,7 @@ public class DDMUtilsGPU
         tmpOmegasCB0.Release();
         tmpOmegasCB1.Release();
 
+        UnityEngine.Profiling.Profiler.EndSample();
         return true;
     }
 }
