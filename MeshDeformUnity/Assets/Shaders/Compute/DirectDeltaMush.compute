@@ -98,8 +98,6 @@ void DeformMesh(uint3 groupID : SV_GroupID, uint3 groupThreadID : SV_GroupThread
 		}
 	}
 
-	//TODO: Bug?
-
 	float3x3 Q = ZERO_MATRIX_3;
 	float3 p = ZERO_VECTOR_3;
 	float3 q = ZERO_VECTOR_3;
