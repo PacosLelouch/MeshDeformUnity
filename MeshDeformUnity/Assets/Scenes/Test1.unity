@@ -135,7 +135,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 207578458}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4a635344223b8ec45a8a1baf7fa4c9f0, type: 3}
   m_Name: 
@@ -148,6 +148,31 @@ MonoBehaviour:
   debugMode: 0
   ductTapedShader: {fileID: 4800000, guid: 943eb20414209bd42aad0509708d1766, type: 3}
   computeShader: {fileID: 7200000, guid: d8cac5718e2023643a794073fd1098fb, type: 3}
+  usePrefilteredBoneWeights: 0
+--- !u!114 &207578462
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 207578458}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2f347b7d3cc1ac40aa02b76dc1bf1e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  precomputeShader: {fileID: 7200000, guid: 680b7cfc9b80cf442a97b69b11685165, type: 3}
+  iterations: 10
+  translationSmooth: 0.9
+  rotationSmooth: 0.9
+  dm_blend: 0
+  deformNormals: 1
+  weightedSmooth: 0
+  useCompute: 1
+  adjacencyMatchingVertexTolerance: 0.0001
+  debugMode: 0
+  ductTapedShader: {fileID: 4800000, guid: 943eb20414209bd42aad0509708d1766, type: 3}
+  computeShader: {fileID: 7200000, guid: 4b734e0ff4eb64b4290319e21101b8d5, type: 3}
   usePrefilteredBoneWeights: 0
 --- !u!1001 &565690313
 PrefabInstance:
@@ -370,7 +395,7 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 8263568848369713691, guid: 58c73b1e2eab1c04ba963d49ced88c96, type: 3}
   m_PrefabInstance: {fileID: 1894043355}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &710727600
+--- !u!114 &710727599
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -378,6 +403,31 @@ MonoBehaviour:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 710727597}
   m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2f347b7d3cc1ac40aa02b76dc1bf1e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  precomputeShader: {fileID: 7200000, guid: 680b7cfc9b80cf442a97b69b11685165, type: 3}
+  iterations: 10
+  translationSmooth: 0.9
+  rotationSmooth: 0.9
+  dm_blend: 0
+  deformNormals: 1
+  weightedSmooth: 0
+  useCompute: 1
+  adjacencyMatchingVertexTolerance: 0.0001
+  debugMode: 0
+  ductTapedShader: {fileID: 4800000, guid: 943eb20414209bd42aad0509708d1766, type: 3}
+  computeShader: {fileID: 7200000, guid: 4b734e0ff4eb64b4290319e21101b8d5, type: 3}
+  usePrefilteredBoneWeights: 0
+--- !u!114 &710727600
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 710727597}
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4a635344223b8ec45a8a1baf7fa4c9f0, type: 3}
   m_Name: 
@@ -503,7 +553,7 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 2577939804720262878, guid: 58c73b1e2eab1c04ba963d49ced88c96, type: 3}
   m_PrefabInstance: {fileID: 1894043355}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1087962804
+--- !u!114 &1087962803
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -511,6 +561,31 @@ MonoBehaviour:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1087962801}
   m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2f347b7d3cc1ac40aa02b76dc1bf1e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  precomputeShader: {fileID: 7200000, guid: 680b7cfc9b80cf442a97b69b11685165, type: 3}
+  iterations: 10
+  translationSmooth: 0.9
+  rotationSmooth: 0.9
+  dm_blend: 0
+  deformNormals: 1
+  weightedSmooth: 0
+  useCompute: 1
+  adjacencyMatchingVertexTolerance: 0.0001
+  debugMode: 0
+  ductTapedShader: {fileID: 4800000, guid: 943eb20414209bd42aad0509708d1766, type: 3}
+  computeShader: {fileID: 7200000, guid: 4b734e0ff4eb64b4290319e21101b8d5, type: 3}
+  usePrefilteredBoneWeights: 0
+--- !u!114 &1087962804
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1087962801}
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4a635344223b8ec45a8a1baf7fa4c9f0, type: 3}
   m_Name: 
@@ -593,7 +668,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1635745934}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4a635344223b8ec45a8a1baf7fa4c9f0, type: 3}
   m_Name: 
@@ -606,6 +681,31 @@ MonoBehaviour:
   debugMode: 0
   ductTapedShader: {fileID: 4800000, guid: 943eb20414209bd42aad0509708d1766, type: 3}
   computeShader: {fileID: 7200000, guid: d8cac5718e2023643a794073fd1098fb, type: 3}
+  usePrefilteredBoneWeights: 0
+--- !u!114 &1635745938
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1635745934}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2f347b7d3cc1ac40aa02b76dc1bf1e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  precomputeShader: {fileID: 7200000, guid: 680b7cfc9b80cf442a97b69b11685165, type: 3}
+  iterations: 5
+  translationSmooth: 0.9
+  rotationSmooth: 0.9
+  dm_blend: 0
+  deformNormals: 1
+  weightedSmooth: 0
+  useCompute: 1
+  adjacencyMatchingVertexTolerance: 0.0001
+  debugMode: 0
+  ductTapedShader: {fileID: 4800000, guid: 943eb20414209bd42aad0509708d1766, type: 3}
+  computeShader: {fileID: 7200000, guid: 4b734e0ff4eb64b4290319e21101b8d5, type: 3}
   usePrefilteredBoneWeights: 0
 --- !u!1001 &1894043355
 PrefabInstance:
@@ -717,7 +817,7 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 8103130066755182090, guid: 58c73b1e2eab1c04ba963d49ced88c96, type: 3}
   m_PrefabInstance: {fileID: 1894043355}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1942101096
+--- !u!114 &1942101095
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -725,6 +825,31 @@ MonoBehaviour:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1942101093}
   m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2f347b7d3cc1ac40aa02b76dc1bf1e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  precomputeShader: {fileID: 7200000, guid: 680b7cfc9b80cf442a97b69b11685165, type: 3}
+  iterations: 10
+  translationSmooth: 0.9
+  rotationSmooth: 0.9
+  dm_blend: 0
+  deformNormals: 1
+  weightedSmooth: 0
+  useCompute: 1
+  adjacencyMatchingVertexTolerance: 0.0001
+  debugMode: 0
+  ductTapedShader: {fileID: 4800000, guid: 943eb20414209bd42aad0509708d1766, type: 3}
+  computeShader: {fileID: 7200000, guid: 4b734e0ff4eb64b4290319e21101b8d5, type: 3}
+  usePrefilteredBoneWeights: 0
+--- !u!114 &1942101096
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1942101093}
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4a635344223b8ec45a8a1baf7fa4c9f0, type: 3}
   m_Name: 

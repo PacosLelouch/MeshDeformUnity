@@ -79,6 +79,8 @@ public class DDMSkinnedMeshGPU : MonoBehaviour
 	internal ComputeBuffer omegasCB; // float4x4 * 4
 	internal ComputeBuffer outputCB; // float3 + float3
 
+	internal DDMUtilsIterative.OmegaWithIndex[,] omegaWithIdxs;
+
 	//////
 	internal ComputeBuffer laplacianCB;
 	//////laplacianCB
@@ -98,7 +100,7 @@ public class DDMSkinnedMeshGPU : MonoBehaviour
 		//B.At(0, 1, 1.0f);
 		//Debug.Log("B:" + B);
 		//// End Test Math.NET
-		Debug.Assert(SystemInfo.supportsComputeShaders && computeShader != null && precomputeShader != null);
+		Debug.Assert(SystemInfo.supportsComputeShaders && precomputeShader != null);
 
 		if (precomputeShader)
 		{
@@ -227,8 +229,9 @@ public class DDMSkinnedMeshGPU : MonoBehaviour
 
 		if(!useCompute)
         {
-			//TODO
-        }
+			omegaWithIdxs = new DDMUtilsIterative.OmegaWithIndex[vCount, maxOmegaCount];
+			omegasCB.GetData(omegaWithIdxs);
+		}
 	}
 
 	void OnDestroy()
@@ -252,10 +255,10 @@ public class DDMSkinnedMeshGPU : MonoBehaviour
 
 		if (actuallyUseCompute)
 			UpdateMeshOnGPU();
-		//else
-		//	UpdateMeshOnCPU();
+        else
+            UpdateMeshOnCPU();
 
-		if (compareWithSkinning)
+        if (compareWithSkinning)
 			DrawVerticesVsSkin();
 		//else if (debugMode == DebugMode.Deltas)
 		//	DrawDeltas();
@@ -291,7 +294,7 @@ public class DDMSkinnedMeshGPU : MonoBehaviour
 		}
 	}
 
-	static private int[,] GetCachedAdjacencyMatrix(Mesh mesh, float adjacencyMatchingVertexTolerance)
+	static public int[,] GetCachedAdjacencyMatrix(Mesh mesh, float adjacencyMatchingVertexTolerance)
 	{
 		int[,] adjacencyMatrix;
 		//#if UNITY_EDITOR
@@ -408,11 +411,33 @@ public class DDMSkinnedMeshGPU : MonoBehaviour
 			}
 #endif // WITH_SCALE_MATRIX
 
-			DenseMatrix mat4 = new DenseMatrix(4);
-			for (int bi = 0; bi < boneMatrices.Length; ++bi)
-            {
-				mat4 += boneMatricesDense[bi] * omegas[vi, bi];
+			DenseMatrix mat4 = DenseMatrix.CreateIdentity(4);
+
+			DDMUtilsIterative.OmegaWithIndex oswi0 = omegaWithIdxs[vi, 0];
+			if (oswi0.boneIndex >= 0)
+			{
+				DenseMatrix omega0 = new DenseMatrix(4);
+				omega0[0, 0] = oswi0.m00; omega0[0, 1] = oswi0.m01; omega0[0, 2] = oswi0.m02; omega0[0, 3] = oswi0.m03;
+				omega0[1, 0] = oswi0.m01; omega0[1, 1] = oswi0.m11; omega0[1, 2] = oswi0.m12; omega0[1, 3] = oswi0.m13;
+				omega0[2, 0] = oswi0.m02; omega0[2, 1] = oswi0.m12; omega0[2, 2] = oswi0.m22; omega0[2, 3] = oswi0.m23;
+				omega0[3, 0] = oswi0.m03; omega0[3, 1] = oswi0.m13; omega0[3, 2] = oswi0.m23; omega0[3, 3] = oswi0.m33;
+				mat4 = boneMatricesDense[oswi0.boneIndex] * omega0;
+				for (int i = 1; i < maxOmegaCount; ++i)
+				{
+					DDMUtilsIterative.OmegaWithIndex oswi = omegaWithIdxs[vi, i];
+					if (oswi.boneIndex < 0)
+					{
+						break;
+					}
+					DenseMatrix omega = new DenseMatrix(4);
+					omega[0, 0] = oswi.m00; omega[0, 1] = oswi.m01; omega[0, 2] = oswi.m02; omega[0, 3] = oswi.m03;
+					omega[1, 0] = oswi.m01; omega[1, 1] = oswi.m11; omega[1, 2] = oswi.m12; omega[1, 3] = oswi.m13;
+					omega[2, 0] = oswi.m02; omega[2, 1] = oswi.m12; omega[2, 2] = oswi.m22; omega[2, 3] = oswi.m23;
+					omega[3, 0] = oswi.m03; omega[3, 1] = oswi.m13; omega[3, 2] = oswi.m23; omega[3, 3] = oswi.m33; 
+					mat4 += boneMatricesDense[oswi.boneIndex] * omega;
+				}
 			}
+
 			DenseMatrix Qi = new DenseMatrix(3);
 			for (int row = 0; row < 3; ++row)
 			{
