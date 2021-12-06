@@ -184,4 +184,86 @@ public class DDMUtilsGPU
 
         return true;
     }
+
+    static public bool computePppsCBFromOmegasCB(
+        ref ComputeBuffer pppsCB,
+        ComputeShader precomputeShader,
+        ComputeBuffer omegasCB,
+        int vCount, int boneCount)
+    {
+        if (precomputeShader == null)
+        {
+            return false;
+        }
+
+        precomputeShader.SetInt("VertexCount", vCount);
+        precomputeShader.SetInt("BoneCount", boneCount);
+
+        uint threadGroupSizeX, threadGroupSizeY, threadGroupSizeZ;
+
+        int kernelComputePpps = precomputeShader.FindKernel("ComputePpps");
+        precomputeShader.GetKernelThreadGroupSizes(kernelComputePpps, out threadGroupSizeX, out threadGroupSizeY, out threadGroupSizeZ);
+        int threadGroupsX = (vCount + (int)threadGroupSizeX - 1) / (int)threadGroupSizeX;
+        precomputeShader.SetBuffer(kernelComputePpps, "PreOmegas", omegasCB);
+        precomputeShader.SetBuffer(kernelComputePpps, "Ppps", pppsCB);
+        precomputeShader.Dispatch(kernelComputePpps, threadGroupsX, 1, 1);
+
+        return true;
+    }
+
+    static public bool computeLastcolsCBPsCBFromOmegasCB(
+        ref ComputeBuffer lastcolsCB,
+        ref ComputeBuffer psCB,
+        ComputeShader precomputeShader,
+        ComputeBuffer omegasCB,
+        int vCount, int boneCount)
+    {
+        if (precomputeShader == null)
+        {
+            return false;
+        }
+
+        precomputeShader.SetInt("VertexCount", vCount);
+        precomputeShader.SetInt("BoneCount", boneCount);
+
+        uint threadGroupSizeX, threadGroupSizeY, threadGroupSizeZ;
+
+        int kernelComputeLastcolsPs = precomputeShader.FindKernel("ComputeLastcolsPs");
+        precomputeShader.GetKernelThreadGroupSizes(kernelComputeLastcolsPs, out threadGroupSizeX, out threadGroupSizeY, out threadGroupSizeZ);
+        int threadGroupsX = (vCount + (int)threadGroupSizeX - 1) / (int)threadGroupSizeX;
+        precomputeShader.SetBuffer(kernelComputeLastcolsPs, "PreOmegas", omegasCB);
+        precomputeShader.SetBuffer(kernelComputeLastcolsPs, "Lastcols", lastcolsCB);
+        precomputeShader.SetBuffer(kernelComputeLastcolsPs, "Ps", psCB);
+        precomputeShader.Dispatch(kernelComputeLastcolsPs, threadGroupsX, 1, 1);
+
+        return true;
+    }
+
+    static public bool computeLastomegasCBPsCBFromOmegasCB(
+        ref ComputeBuffer lastomegasCB,
+        ref ComputeBuffer psCB,
+        ComputeShader precomputeShader,
+        ComputeBuffer omegasCB,
+        int vCount, int boneCount)
+    {
+        if (precomputeShader == null)
+        {
+            return false;
+        }
+
+        precomputeShader.SetInt("VertexCount", vCount);
+        precomputeShader.SetInt("BoneCount", boneCount);
+
+        uint threadGroupSizeX, threadGroupSizeY, threadGroupSizeZ;
+
+        int kernelComputeLastomegasPs = precomputeShader.FindKernel("ComputeLastomegasPs");
+        precomputeShader.GetKernelThreadGroupSizes(kernelComputeLastomegasPs, out threadGroupSizeX, out threadGroupSizeY, out threadGroupSizeZ);
+        int threadGroupsX = (vCount + (int)threadGroupSizeX - 1) / (int)threadGroupSizeX;
+        precomputeShader.SetBuffer(kernelComputeLastomegasPs, "PreOmegas", omegasCB);
+        precomputeShader.SetBuffer(kernelComputeLastomegasPs, "Lastomegas", lastomegasCB);
+        precomputeShader.SetBuffer(kernelComputeLastomegasPs, "Ps", psCB);
+        precomputeShader.Dispatch(kernelComputeLastomegasPs, threadGroupsX, 1, 1);
+
+        return true;
+    }
 }

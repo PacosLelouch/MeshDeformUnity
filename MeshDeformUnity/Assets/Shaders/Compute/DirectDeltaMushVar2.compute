@@ -1,0 +1,111 @@
+﻿#pragma kernel DeformMesh
+#define THREAD_GROUP_SIZE_X 256
+
+#include "Math.cginc"
+#include "DeltaMushCommon.cginc"
+
+
+struct OutputVertex
+{
+    float3 pos;
+    float3 normal;
+};
+
+// input
+StructuredBuffer<float3> Vertices;
+StructuredBuffer<float3> Normals;
+StructuredBuffer<BoneWeights> Weights;
+StructuredBuffer<float4x4> Bones;
+//StructuredBuffer<OmegaStruct> Omegas;
+StructuredBuffer<OmegaLastColumnStructWithIndex> Lastcols;
+StructuredBuffer<float3> Ps;
+
+int VertexCount;
+
+//StructuredBuffer<OutputVertex> Input;
+
+// output
+RWStructuredBuffer<OutputVertex> Output;
+
+void DecomposeMat(in float4x4 mat, out float3x3 Q, out float3 p, out float3 q)
+{
+	Q[0][0] = mat[0][0];
+	Q[0][1] = mat[0][1];
+	Q[0][2] = mat[0][2];
+	Q[1][0] = mat[1][0];
+	Q[1][1] = mat[1][1];
+	Q[1][2] = mat[1][2];
+	Q[2][0] = mat[2][0];
+	Q[2][1] = mat[2][1];
+	Q[2][2] = mat[2][2];
+
+	p[0] = mat[3][0];
+	p[1] = mat[3][1];
+	p[2] = mat[3][2];
+
+	q[0] = mat[0][3];
+	q[1] = mat[1][3];
+	q[2] = mat[2][3];
+}
+
+[numthreads(THREAD_GROUP_SIZE_X, 1, 1)]
+void DeformMesh(uint3 groupID : SV_GroupID, uint3 groupThreadID : SV_GroupThreadID)
+{
+	int idx = THREAD_GROUP_SIZE_X * groupID.x + groupThreadID.x;
+	if (idx >= VertexCount)
+		return;
+
+	float3 pos = Vertices[idx];
+	float3 normal = Normals[idx];
+	int4 boneIndices = Weights[idx].indices;
+	float4 boneWeights = Weights[idx].weights;
+
+    float4 sum_R = ZERO_VECTOR_4;
+    float3 sum_t = ZERO_VECTOR_3;
+    OmegaLastColumnStructWithIndex lastcol0 = Lastcols[idx * MAX_OMEGA_COUNT];
+    if (lastcol0.boneIndex >= 0)
+	{
+        float3x3 M_R0 = ZERO_MATRIX_3;
+        float3 temp0 = ZERO_VECTOR_3;
+        float3 M_t0 = ZERO_VECTOR_3;
+        DecomposeMat(Bones[lastcol0.boneIndex], M_R0, temp0, M_t0);
+		
+        float4 M_q0 = vector_to_quaternion(M_t0);
+		
+        sum_R = lastcol0.omega * M_q0;
+        sum_t = mul(M_R0, lastcol0.X) + lastcol0.omega * M_t0;
+		
+		for (int i = 1; i < MAX_OMEGA_COUNT; ++i)
+		{
+            OmegaLastColumnStructWithIndex lastcol = Lastcols[idx * MAX_OMEGA_COUNT + i];
+            if (lastcol.boneIndex < 0)
+			{
+				break;
+			}
+			
+            float3x3 M_R = ZERO_MATRIX_3;
+            float3 temp = ZERO_VECTOR_3;
+            float3 M_t = ZERO_VECTOR_3;
+            DecomposeMat(Bones[lastcol.boneIndex], M_R, temp, M_t);
+		
+            float4 M_q = vector_to_quaternion(M_t);
+		
+            sum_R += lastcol.omega * M_q;
+            sum_t += mul(M_R, lastcol.X) + lastcol.omega * M_t;
+        }
+	}
+	
+    float3x3 R = quaternion_to_matrix(sum_R);
+
+    float3 t = sum_t - mul(R, Ps[idx]);
+
+	float4x4 gamma = float4x4(
+		R[0][0], R[0][1], R[0][2], t[0],
+		R[1][0], R[1][1], R[1][2], t[1],
+		R[2][0], R[2][1], R[2][2], t[2],
+		0., 0., 0., 1.
+		);
+
+	Output[idx].pos		= mul(gamma, float4(pos, 1.)).xyz;
+	Output[idx].normal	= mul(gamma, float4(normal, 0.)).xyz;
+}

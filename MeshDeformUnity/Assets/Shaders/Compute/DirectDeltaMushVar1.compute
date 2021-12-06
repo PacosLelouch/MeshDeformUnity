@@ -4,12 +4,6 @@
 #include "Math.cginc"
 #include "DeltaMushCommon.cginc"
 
-struct CompressedPpp
-{
-	float m0;
-	float2 m1;
-	float3 m2;
-};
 
 struct OutputVertex
 {
@@ -120,10 +114,7 @@ void DeformMesh(uint3 groupID : SV_GroupID, uint3 groupThreadID : SV_GroupThread
 	}
 	
 	CompressedPpp P_pp_comp = Ppps[idx];
-	float3x3 P_pp = float3x3(
-		P_pp_comp.m0, P_pp_comp.m1.x, P_pp_comp.m2.x,
-		P_pp_comp.m1.x, P_pp_comp.m1.y, P_pp_comp.m2.y,
-		P_pp_comp.m2.x, P_pp_comp.m2.y, P_pp_comp.m2.z);
+    float3x3 P_pp = CompressedPppToMatrix(P_pp_comp);
 
 	//TODO: Bug?
 
