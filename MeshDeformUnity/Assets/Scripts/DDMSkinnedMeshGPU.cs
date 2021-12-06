@@ -252,18 +252,20 @@ public class DDMSkinnedMeshGPU : MonoBehaviour
 	void LateUpdate()
 	{
 		bool compareWithSkinning = debugMode == DebugMode.CompareWithSkinning;
+		if(!compareWithSkinning)
+		{
+			if (actuallyUseCompute)
+				UpdateMeshOnGPU();
+			else
+				UpdateMeshOnCPU();
 
-		if (actuallyUseCompute)
-			UpdateMeshOnGPU();
-        else
-            UpdateMeshOnCPU();
-
-        if (compareWithSkinning)
-			DrawVerticesVsSkin();
-		//else if (debugMode == DebugMode.Deltas)
-		//	DrawDeltas();
-		else
-			DrawMesh();
+			if (compareWithSkinning)
+				DrawVerticesVsSkin();
+			//else if (debugMode == DebugMode.Deltas)
+			//	DrawDeltas();
+			else
+				DrawMesh();
+		}
 
 		skin.enabled = compareWithSkinning;
 	}
