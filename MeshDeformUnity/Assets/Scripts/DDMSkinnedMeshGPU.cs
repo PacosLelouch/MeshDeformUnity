@@ -294,7 +294,7 @@ public class DDMSkinnedMeshGPU : MonoBehaviour
 		}
 	}
 
-	static private int[,] GetCachedAdjacencyMatrix(Mesh mesh, float adjacencyMatchingVertexTolerance)
+	static public int[,] GetCachedAdjacencyMatrix(Mesh mesh, float adjacencyMatchingVertexTolerance)
 	{
 		int[,] adjacencyMatrix;
 		//#if UNITY_EDITOR
