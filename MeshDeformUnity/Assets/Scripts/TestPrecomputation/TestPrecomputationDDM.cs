@@ -6,6 +6,8 @@ public class TestPrecomputationDDM : MonoBehaviour
 {
     public ComputeShader precomputeShader;
 
+    public bool testCPU = true;
+    public bool testGPU = true;
     public int iterations = 2;
 
     public float translationSmooth = 0.9f;
@@ -102,10 +104,18 @@ public class TestPrecomputationDDM : MonoBehaviour
     {
         if (Input.GetKey("t"))
         {
-            Debug.Log("Test GPU precomputation.");
-            GPU_Precomputation();
-            Debug.Log("Test CPU precomputation");
-            CPU_Precomputation();
+            if (testGPU)
+            {
+                testGPU = false;
+                Debug.Log("Test GPU precomputation.");
+                GPU_Precomputation();
+            }
+            if (testCPU)
+            {
+                testCPU = false;
+                Debug.Log("Test CPU precomputation");
+                CPU_Precomputation();
+            }
         }
 
         //if (Input.GetKey("c"))
