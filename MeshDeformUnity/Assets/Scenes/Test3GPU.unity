@@ -189,7 +189,7 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: -8836536860902145631, guid: 2a6916a570b9b4945b21a2f1246fb224, type: 3}
   m_PrefabInstance: {fileID: 318759070}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &318759072
+--- !u!114 &318759073
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -198,10 +198,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 318759071}
   m_Enabled: 0
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 27d9411464f641c48b32b238dec9ff0c, type: 3}
+  m_Script: {fileID: 11500000, guid: c2f347b7d3cc1ac40aa02b76dc1bf1e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  iterations: 2
+  precomputeShader: {fileID: 7200000, guid: 680b7cfc9b80cf442a97b69b11685165, type: 3}
+  iterations: 80
   translationSmooth: 0.9
   rotationSmooth: 0.9
   dm_blend: 0
@@ -212,8 +213,31 @@ MonoBehaviour:
   debugMode: 0
   ductTapedShader: {fileID: 4800000, guid: 943eb20414209bd42aad0509708d1766, type: 3}
   computeShader: {fileID: 7200000, guid: 4b734e0ff4eb64b4290319e21101b8d5, type: 3}
-  usePrefilteredBoneWeights: 0
---- !u!114 &318759073
+--- !u!114 &318759074
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 318759071}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95cb28a92d70c0a43982272a187f99b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  precomputeShader: {fileID: 7200000, guid: 680b7cfc9b80cf442a97b69b11685165, type: 3}
+  iterations: 80
+  translationSmooth: 0.9
+  rotationSmooth: 0.9
+  dm_blend: 0
+  deformNormals: 1
+  weightedSmooth: 0
+  useCompute: 1
+  adjacencyMatchingVertexTolerance: 0.0001
+  debugMode: 0
+  ductTapedShader: {fileID: 4800000, guid: 943eb20414209bd42aad0509708d1766, type: 3}
+  computeShader: {fileID: 7200000, guid: da7b23ea24dee0a4d8bdb9f80447d500, type: 3}
+--- !u!114 &318759076
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -222,7 +246,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 318759071}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c2f347b7d3cc1ac40aa02b76dc1bf1e4, type: 3}
+  m_Script: {fileID: 11500000, guid: 461826e34d36424489613f0071eb382c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   precomputeShader: {fileID: 7200000, guid: 680b7cfc9b80cf442a97b69b11685165, type: 3}
@@ -236,8 +260,7 @@ MonoBehaviour:
   adjacencyMatchingVertexTolerance: 0.0001
   debugMode: 0
   ductTapedShader: {fileID: 4800000, guid: 943eb20414209bd42aad0509708d1766, type: 3}
-  computeShader: {fileID: 7200000, guid: 4b734e0ff4eb64b4290319e21101b8d5, type: 3}
-  usePrefilteredBoneWeights: 0
+  computeShader: {fileID: 7200000, guid: 9bfe7b1442604c449ac8aa871d4fcb35, type: 3}
 --- !u!1 &343345300
 GameObject:
   m_ObjectHideFlags: 0
@@ -504,4 +527,3 @@ MonoBehaviour:
   debugMode: 0
   ductTapedShader: {fileID: 4800000, guid: 943eb20414209bd42aad0509708d1766, type: 3}
   computeShader: {fileID: 7200000, guid: 4b734e0ff4eb64b4290319e21101b8d5, type: 3}
-  usePrefilteredBoneWeights: 0

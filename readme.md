@@ -29,6 +29,16 @@ Add `MeshDeformUnity` to Unity Hub and select unity version. Then you can open t
 
 
 
+### Precomputation
+
+
+
+
+
+### Animation
+
+
+
 
 
 ## Performance Analysis
@@ -45,10 +55,12 @@ Add `MeshDeformUnity` to Unity Hub and select unity version. Then you can open t
 
 
 
-## Credit
+## Credit & Reference
 
 1. [Unity](https://unity.com/)
 1. [Math.NET Numerics](https://github.com/mathnet/mathnet-numerics)
+1. [Delta Mush: smoothing deformations while preserving detail](https://dl.acm.org/doi/10.1145/2633374.2633376)
+1. [Direct Delta Mush Skinning and Variants](https://www.ea.com/seed/news/siggraph2019-direct-delta-mush)
 
 
 
@@ -58,4 +70,6 @@ Add `MeshDeformUnity` to Unity Hub and select unity version. Then you can open t
 2. [Milestone 1](https://docs.google.com/presentation/d/1DddtqMYNPFK_de73_3AZ3dXIFQ1iPYBxOBAKMeCrQ8A/)
 3. [Milestone 2](https://docs.google.com/presentation/d/14nwoKlDBEHcIAdbmpu_0bEEPnFItTixbUZDCPtQ1mfM/)
 3. [Milestone 3](https://docs.google.com/presentation/d/1FIu6bGBnXOtndSAxtpXztczM1mbGk7st8uuC3rlGfBQ/)
+3. [Final]()
+3. [Sample Video]()
 

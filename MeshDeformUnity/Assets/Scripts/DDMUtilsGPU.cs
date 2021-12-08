@@ -59,7 +59,7 @@ public class DDMUtilsGPU
         return indexWeightPairsCPU;
     }
 
-    static public bool computeLaplacianCBFromAdjacency(ref ComputeBuffer laplacianCB, ComputeShader precomputeShader, int[,] adjacencyMatrix)
+    static public bool ComputeLaplacianCBFromAdjacency(ref ComputeBuffer laplacianCB, ComputeShader precomputeShader, int[,] adjacencyMatrix)
     {
         if(precomputeShader == null)
         {
@@ -70,7 +70,7 @@ public class DDMUtilsGPU
         //    laplacianCB.Release();
         //    laplacianCB = null;
         //}
-        UnityEngine.Profiling.Profiler.BeginSample("computeLaplacianCBFromAdjacency");
+        UnityEngine.Profiling.Profiler.BeginSample("ComputeLaplacianCBFromAdjacency");
 
         int vCount = adjacencyMatrix.GetLength(0);
         int aCount = adjacencyMatrix.GetLength(1);
@@ -274,7 +274,7 @@ public class DDMUtilsGPU
                 ++curOI;
             }
 
-            while (curOI < DDMSkinnedMeshGPU.maxOmegaCount)
+            while (curOI < DDMSkinnedMeshGPUVar0.maxOmegaCount)
             {
                 DDMUtilsIterative.OmegaWithIndex oswi = new DDMUtilsIterative.OmegaWithIndex();
                 oswi.boneIndex = -1;
@@ -287,7 +287,7 @@ public class DDMUtilsGPU
         return omegas;
     }
 
-    static public bool computeOmegasCBFromLaplacianCB(
+    static public bool ComputeOmegasCBFromLaplacianCB(
         ref ComputeBuffer omegasCB, 
         ComputeShader precomputeShader, 
         ComputeBuffer verticesCB, 
@@ -304,7 +304,7 @@ public class DDMUtilsGPU
         //    omegasCB.Release();
         //    omegasCB = null;
         //}
-        UnityEngine.Profiling.Profiler.BeginSample("computeOmegasCBFromLaplacianCB");
+        UnityEngine.Profiling.Profiler.BeginSample("ComputeOmegasCBFromLaplacianCB");
         int vCount = verticesCB.count;
         int aCount = omegaCount;
 

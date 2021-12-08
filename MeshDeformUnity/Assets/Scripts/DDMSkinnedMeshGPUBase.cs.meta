@@ -1,12 +1,12 @@
 fileFormatVersion: 2
-guid: 77ac9b6d44ac31548907156a36b77dae
+guid: 37f9b6c07aee24c48b1c8116705be89f
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
   defaultReferences:
   - precomputeShader: {fileID: 7200000, guid: 680b7cfc9b80cf442a97b69b11685165, type: 3}
   - ductTapedShader: {fileID: 4800000, guid: 943eb20414209bd42aad0509708d1766, type: 3}
-  - computeShader: {fileID: 7200000, guid: c289d469e63b69e40b06dd7b7e8970ce, type: 3}
+  - computeShader: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

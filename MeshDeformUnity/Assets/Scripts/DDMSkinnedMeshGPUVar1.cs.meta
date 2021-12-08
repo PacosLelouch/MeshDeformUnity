@@ -3,7 +3,10 @@ guid: 95cb28a92d70c0a43982272a187f99b0
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - precomputeShader: {fileID: 7200000, guid: 680b7cfc9b80cf442a97b69b11685165, type: 3}
+  - ductTapedShader: {fileID: 4800000, guid: 943eb20414209bd42aad0509708d1766, type: 3}
+  - computeShader: {fileID: 7200000, guid: da7b23ea24dee0a4d8bdb9f80447d500, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
