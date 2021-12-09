@@ -73,7 +73,7 @@ public class DDMSkinnedMeshGPUVar23 : DDMSkinnedMeshGPUBase
 		//	verticesCB, laplacianCB, weightsCB, 
 		//	bCount, iterations, translationSmooth);
 
-		DDMUtilsGPU.computeLastcolsCBPsCBFromOmegasCB(ref lastcolsCB, ref psCB, precomputeShader, omegasCB, vCount, bCount);
+		DDMUtilsGPU.ComputeLastcolsCBPsCBFromOmegasCB(ref lastcolsCB, ref psCB, precomputeShader, omegasCB, vCount, bCount);
 
 		if (!useCompute)
         {
@@ -92,11 +92,16 @@ public class DDMSkinnedMeshGPUVar23 : DDMSkinnedMeshGPUBase
 		ReleaseBase();
 	}
 
+	void LateUpdate()
+	{
+		UpdateBase();
+	}
+
 	#region Direct Delta Mush implementation
 
 	//protected override void UpdateMeshOnCPU()
 	//{
-		
+
 	//}
 
 	protected override void UpdateMeshOnGPU()

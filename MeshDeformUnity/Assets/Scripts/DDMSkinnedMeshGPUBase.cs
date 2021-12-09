@@ -180,22 +180,22 @@ abstract public class DDMSkinnedMeshGPUBase : MonoBehaviour
         outputCB.Release();
     }
 
-	//void OnDestroy()
-	//{
-	//	if (verticesCB == null)
-	//		return;
+    //void OnDestroy()
+    //{
+    //	if (verticesCB == null)
+    //		return;
 
-	//	verticesCB.Release();
-	//	normalsCB.Release();
-	//	weightsCB.Release();
-	//	bonesCB.Release();
-	//	omegasCB.Release();
-	//	outputCB.Release();
+    //	verticesCB.Release();
+    //	normalsCB.Release();
+    //	weightsCB.Release();
+    //	bonesCB.Release();
+    //	omegasCB.Release();
+    //	outputCB.Release();
 
-	//	laplacianCB.Release();
-	//}
+    //	laplacianCB.Release();
+    //}
 
-	protected void LateUpdate()
+    protected void UpdateBase()
 	{
 		bool compareWithSkinning = debugMode == DebugMode.CompareWithLinearBlend;
 		if(!compareWithSkinning)

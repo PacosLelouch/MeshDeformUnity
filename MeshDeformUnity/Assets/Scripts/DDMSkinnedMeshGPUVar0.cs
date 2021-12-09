@@ -105,6 +105,11 @@ public class DDMSkinnedMeshGPUVar0 : DDMSkinnedMeshGPUBase
 		ReleaseBase();
 	}
 
+	void LateUpdate()
+    {
+		UpdateBase();
+    }
+
 #region Direct Delta Mush implementation
 	protected override void UpdateMeshOnCPU()
 	{

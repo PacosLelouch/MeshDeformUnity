@@ -12,11 +12,23 @@ public class DDMUtilsGPU
         public float weight;
     }
 
-    static public int omegaCount = 16;
+    static public int omegaCount = DDMSkinnedMeshGPUBase.maxOmegaCount;
+    static public bool isTestingPerformance = false;
 
     //internal ComputeBuffer verticesCB;
     //internal ComputeBuffer laplacianCB;
     //internal ComputeBuffer omegasCB;
+
+    static void SynchronizeCompute()
+    {
+        //TODO
+        //var fence = Graphics.CreateGraphicsFence(UnityEngine.Rendering.GraphicsFenceType.AsyncQueueSynchronisation, UnityEngine.Rendering.SynchronisationStageFlags.ComputeProcessing);
+        //Graphics.WaitOnAsyncGraphicsFence(fence);
+        //while(!fence.passed)
+        //{
+        //    Debug.Log(fence);
+        //}
+    }
 
     static public IndexWeightPair[,] ComputeLaplacianWithIndexFromAdjacency(int[,] adjacencyMatrix)
     {
@@ -112,6 +124,11 @@ public class DDMUtilsGPU
         precomputeShader.Dispatch(kernelBuildLaplacian, threadGroupsX, 1, 1);
 
         AdjacencyCB.Release();
+
+        if(isTestingPerformance)
+        {
+            SynchronizeCompute();
+        }
 
         UnityEngine.Profiling.Profiler.EndSample();
         return true;
@@ -430,11 +447,16 @@ public class DDMUtilsGPU
         tmpOmegasCB0.Release();
         tmpOmegasCB1.Release();
 
+        if (isTestingPerformance)
+        {
+            SynchronizeCompute();
+        }
+
         UnityEngine.Profiling.Profiler.EndSample();
         return true;
     }
 
-    static public bool computePppsCBFromOmegasCB(
+    static public bool ComputePppsCBFromOmegasCB(
         ref ComputeBuffer pppsCB,
         ComputeShader precomputeShader,
         ComputeBuffer omegasCB,
@@ -460,7 +482,7 @@ public class DDMUtilsGPU
         return true;
     }
 
-    static public bool computeLastcolsCBPsCBFromOmegasCB(
+    static public bool ComputeLastcolsCBPsCBFromOmegasCB(
         ref ComputeBuffer lastcolsCB,
         ref ComputeBuffer psCB,
         ComputeShader precomputeShader,
@@ -488,7 +510,7 @@ public class DDMUtilsGPU
         return true;
     }
 
-    static public bool computeLastomegasCBPsCBFromOmegasCB(
+    static public bool ComputeLastomegasCBPsCBFromOmegasCB(
         ref ComputeBuffer lastomegasCB,
         ref ComputeBuffer psCB,
         ComputeShader precomputeShader,

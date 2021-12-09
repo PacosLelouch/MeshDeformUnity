@@ -73,7 +73,7 @@ public class DDMSkinnedMeshGPUVar4 : DDMSkinnedMeshGPUBase
 		//	verticesCB, laplacianCB, weightsCB, 
 		//	bCount, iterations, translationSmooth);
 
-		DDMUtilsGPU.computeLastomegasCBPsCBFromOmegasCB(ref lastomegasCB, ref psCB, precomputeShader, omegasCB, vCount, bCount);
+		DDMUtilsGPU.ComputeLastomegasCBPsCBFromOmegasCB(ref lastomegasCB, ref psCB, precomputeShader, omegasCB, vCount, bCount);
 
 		if (!useCompute)
         {
@@ -90,6 +90,11 @@ public class DDMSkinnedMeshGPUVar4 : DDMSkinnedMeshGPUBase
 		}
 
 		ReleaseBase();
+	}
+
+	void LateUpdate()
+	{
+		UpdateBase();
 	}
 
 	//void LateUpdate()

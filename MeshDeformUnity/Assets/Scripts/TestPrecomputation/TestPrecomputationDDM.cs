@@ -66,6 +66,7 @@ public class TestPrecomputationDDM : MonoBehaviour
         laplacianCB = new ComputeBuffer(vCount * DDMSkinnedMeshGPUBase.maxOmegaCount, (sizeof(int) + sizeof(float)));
 
         //omegaWithIdxs = new DDMUtilsIterative.OmegaWithIndex[vCount, DDMSkinnedMeshGPU.maxOmegaCount];
+        DDMUtilsGPU.isTestingPerformance = true;
     }
 
     void CPU_Precomputation()
