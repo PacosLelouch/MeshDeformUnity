@@ -99,13 +99,13 @@ void DeformMesh(uint3 groupID : SV_GroupID, uint3 groupThreadID : SV_GroupThread
 
     float3 t = sum_t - mul(R, Ps[idx]);
 
-	float4x4 gamma = float4x4(
-		R[0][0], R[0][1], R[0][2], t[0],
-		R[1][0], R[1][1], R[1][2], t[1],
-		R[2][0], R[2][1], R[2][2], t[2],
-		0., 0., 0., 1.
-		);
+	//float4x4 gamma = float4x4(
+	//	R[0][0], R[0][1], R[0][2], t[0],
+	//	R[1][0], R[1][1], R[1][2], t[1],
+	//	R[2][0], R[2][1], R[2][2], t[2],
+	//	0., 0., 0., 1.
+	//	);
 
-	Output[idx].pos		= mul(gamma, float4(pos, 1.)).xyz;
-	Output[idx].normal	= mul(gamma, float4(normal, 0.)).xyz;
+	Output[idx].pos = mul(R, pos) + t;// mul(gamma, float4(pos, 1.)).xyz;
+	Output[idx].normal = mul(R, normal);//mul(gamma, float4(normal, 0.)).xyz;
 }

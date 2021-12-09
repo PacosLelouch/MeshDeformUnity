@@ -92,8 +92,10 @@ void DeformMesh(uint3 groupID : SV_GroupID, uint3 groupThreadID : SV_GroupThread
 	}
 	
     float3 d_pos = pos - Ps[idx];
-    Output[idx].pos = sum_t + normalize(mul(sum_R, d_pos)) * length(d_pos);
+    //Output[idx].pos = sum_t + normalize(mul(sum_R, d_pos)) * length(d_pos);
+	Output[idx].pos = sum_t + mul(sum_R, d_pos);
 
-    float3 d_norm = normal - Ps[idx];
-    Output[idx].normal = sum_t + normalize(mul(sum_R, d_norm)) * length(d_norm);
+	Output[idx].normal = mul(sum_R, normal);
+    //float3 d_norm = normal - Ps[idx];
+    //Output[idx].normal = sum_t + normalize(mul(sum_R, d_norm)) * length(d_norm);
 }
