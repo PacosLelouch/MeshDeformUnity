@@ -1,4 +1,5 @@
-﻿#pragma kernel InitOmegas
+﻿#pragma kernel BuildLaplacianFromAdjacency
+#pragma kernel InitOmegas
 #pragma kernel ComputeOmegasPreStep
 #pragma kernel ComputeOmegasOneSweep
 #pragma kernel CompressOmegas
@@ -12,6 +13,7 @@
 #include "DeltaMushCommon.cginc"
 
 // input
+StructuredBuffer<int> Adjacency;
 StructuredBuffer<IndexWeightPair> Laplacian;
 StructuredBuffer<OmegaStructWithIndex> PreOmegas;
 
@@ -23,6 +25,8 @@ int BoneCount;
 float Lambda;
 
 // output
+RWStructuredBuffer<IndexWeightPair> OutLaplacian;
+
 RWStructuredBuffer<OmegaStructWithIndex> Omegas;
 
 RWStructuredBuffer<CompressedPpp> Ppps;
@@ -31,6 +35,39 @@ RWStructuredBuffer<OmegaLastColumnStructWithIndex> Lastcols;
 RWStructuredBuffer<float3> Ps;
 
 RWStructuredBuffer<IndexWeightPair> Lastomegas;
+
+[numthreads(THREAD_GROUP_SIZE_X, 1, 1)]
+void BuildLaplacianFromAdjacency(uint3 groupID : SV_GroupID, uint3 groupThreadID : SV_GroupThreadID)
+{
+	int vi = THREAD_GROUP_SIZE_X * groupID.x + groupThreadID.x;
+	if (vi >= VertexCount)
+		return;
+
+	IndexWeightPair indexWeightPairs[MAX_OMEGA_COUNT];
+
+	float sum = 0.0f;
+	int ai;
+	for (ai = 0; ai < MAX_OMEGA_COUNT; ++ai)
+	{
+		int ki = Adjacency[vi * MAX_OMEGA_COUNT + ai];
+		if (ki >= 0)
+		{
+			sum += 1.0f;
+		}
+		indexWeightPairs[ai].index = ki;
+	}
+
+	for (ai = 0; ai < MAX_OMEGA_COUNT; ++ai)
+	{
+		int ki = indexWeightPairs[ai].index;
+		if (ki >= 0)
+		{
+			indexWeightPairs[ai].weight = -1.0f / sum;
+		}
+
+		OutLaplacian[vi * MAX_OMEGA_COUNT + ai] = indexWeightPairs[ai];
+	}
+}
 
 [numthreads(THREAD_GROUP_SIZE_X, 1, 1)]
 void InitOmegas(uint3 groupID : SV_GroupID, uint3 groupThreadID : SV_GroupThreadID)

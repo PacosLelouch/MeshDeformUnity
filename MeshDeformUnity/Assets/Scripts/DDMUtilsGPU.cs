@@ -32,11 +32,11 @@ public class DDMUtilsGPU
             for (; ai < aCount && ai < omegaCount; ++ai)
             {
                 int adjVi = adjacencyMatrix[vi, ai];
-                if (adjVi < 0)
+                if (adjVi >= 0)
                 {
-                    break;
+                    sum += 1.0f;
                 }
-                sum += 1.0f;
+                indexWeightPairsCPU[vi, ai].index = adjVi;
             }
             for (ai = 0; ai < aCount && ai < omegaCount; ++ai)
             {
@@ -45,13 +45,7 @@ public class DDMUtilsGPU
                 {
                     break;
                 }
-                indexWeightPairsCPU[vi, ai].index = adjVi;
                 indexWeightPairsCPU[vi, ai].weight = -1.0f / sum;
-            }
-            for (; ai < aCount && ai < omegaCount; ++ai)
-            {
-                indexWeightPairsCPU[vi, ai].index = -1;
-
             }
         }
 
@@ -59,9 +53,35 @@ public class DDMUtilsGPU
         return indexWeightPairsCPU;
     }
 
-    static public bool ComputeLaplacianCBFromAdjacency(ref ComputeBuffer laplacianCB, ComputeShader precomputeShader, int[,] adjacencyMatrix)
+    static public bool ComputeLaplacianCBFromAdjacencyCPU(ref ComputeBuffer laplacianCB, ComputeShader precomputeShader, int[,] adjacencyMatrix)
     {
         if(precomputeShader == null)
+        {
+            return false;
+        }
+        //if(laplacianCB != null)
+        //{
+        //    laplacianCB.Release();
+        //    laplacianCB = null;
+        //}
+        UnityEngine.Profiling.Profiler.BeginSample("ComputeLaplacianCBFromAdjacencyCPU");
+
+        int vCount = adjacencyMatrix.GetLength(0);
+        int aCount = adjacencyMatrix.GetLength(1);
+
+        Debug.Assert(laplacianCB.count == vCount * omegaCount && laplacianCB.stride == sizeof(int) + sizeof(float));
+        //laplacianCB = new ComputeBuffer(vCount * omegaCount, (sizeof(int) + sizeof(float)));
+
+        IndexWeightPair[,] indexWeightPairsCPU = ComputeLaplacianWithIndexFromAdjacency(adjacencyMatrix);
+        laplacianCB.SetData(indexWeightPairsCPU);
+
+        UnityEngine.Profiling.Profiler.EndSample();
+        return true;
+    }
+
+    static public bool ComputeLaplacianCBFromAdjacency(ref ComputeBuffer laplacianCB, ComputeShader precomputeShader, int[,] adjacencyMatrix)
+    {
+        if (precomputeShader == null)
         {
             return false;
         }
@@ -75,11 +95,23 @@ public class DDMUtilsGPU
         int vCount = adjacencyMatrix.GetLength(0);
         int aCount = adjacencyMatrix.GetLength(1);
 
-        Debug.Assert(laplacianCB.count == vCount * omegaCount && laplacianCB.stride == sizeof(int) + sizeof(float));
-        //laplacianCB = new ComputeBuffer(vCount * omegaCount, (sizeof(int) + sizeof(float)));
+        ComputeBuffer AdjacencyCB = new ComputeBuffer(vCount * aCount, sizeof(int));
+        AdjacencyCB.SetData(adjacencyMatrix);
 
-        IndexWeightPair[,] indexWeightPairsCPU = ComputeLaplacianWithIndexFromAdjacency(adjacencyMatrix);
-        laplacianCB.SetData(indexWeightPairsCPU);
+        Debug.Assert(laplacianCB.count == vCount * omegaCount && laplacianCB.stride == sizeof(int) + sizeof(float));
+
+        precomputeShader.SetInt("VertexCount", vCount);
+
+        uint threadGroupSizeX, threadGroupSizeY, threadGroupSizeZ;
+
+        int kernelBuildLaplacian = precomputeShader.FindKernel("BuildLaplacianFromAdjacency");
+        precomputeShader.GetKernelThreadGroupSizes(kernelBuildLaplacian, out threadGroupSizeX, out threadGroupSizeY, out threadGroupSizeZ);
+        int threadGroupsX = (vCount + (int)threadGroupSizeX - 1) / (int)threadGroupSizeX;
+        precomputeShader.SetBuffer(kernelBuildLaplacian, "Adjacency", AdjacencyCB);
+        precomputeShader.SetBuffer(kernelBuildLaplacian, "OutLaplacian", laplacianCB);
+        precomputeShader.Dispatch(kernelBuildLaplacian, threadGroupsX, 1, 1);
+
+        AdjacencyCB.Release();
 
         UnityEngine.Profiling.Profiler.EndSample();
         return true;

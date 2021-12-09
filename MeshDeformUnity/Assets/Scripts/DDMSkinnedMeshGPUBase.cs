@@ -12,19 +12,17 @@ using MathNet.Numerics.LinearAlgebra.Solvers;
 [RequireComponent(typeof(SkinnedMeshRenderer))]
 abstract public class DDMSkinnedMeshGPUBase : MonoBehaviour
 {
-	public ComputeShader precomputeShader;
-
-	public int iterations = 2;
+	public int iterations = 5;
 
 	public float translationSmooth = 0.9f; 
 	public float rotationSmooth = 0.9f;
-	public float dm_blend = 0.0f;
+	//public float dm_blend = 0.0f;
 
-	public bool deformNormals = true;
-	public bool weightedSmooth = false;//true;
+	//public bool deformNormals = true;
+	//public bool weightedSmooth = false;//true;
 	public bool useCompute = true;
 
-	public float adjacencyMatchingVertexTolerance = 1e-4f;
+	public float adjacencyMatchingVertexTolerance = 0.0f;//1e-4f;
 
 	public enum DebugMode { Off, CompareWithLinearBlend, /*SmoothOnly, Deltas*/ }
 
@@ -61,7 +59,9 @@ abstract public class DDMSkinnedMeshGPUBase : MonoBehaviour
 	protected int[,] adjacencyMatrix;
 
 	// Compute
-	//[HideInInspector]
+	[HideInInspector]
+	public ComputeShader precomputeShader;
+	[HideInInspector]
 	public Shader ductTapedShader;
 	//[HideInInspector]
 	public ComputeShader computeShader;
@@ -204,14 +204,13 @@ abstract public class DDMSkinnedMeshGPUBase : MonoBehaviour
 				UpdateMeshOnGPU();
 			else
 				UpdateMeshOnCPU();
-
-			if (compareWithSkinning)
-				DrawVerticesVsSkin();
-			//else if (debugMode == DebugMode.Deltas)
-			//	DrawDeltas();
-			else
-				DrawMesh();
 		}
+		if (compareWithSkinning)
+			DrawVerticesVsSkin();
+		//else if (debugMode == DebugMode.Deltas)
+		//	DrawDeltas();
+		else
+			DrawMesh();
 
 		skin.enabled = compareWithSkinning;
 	}
@@ -257,7 +256,7 @@ abstract public class DDMSkinnedMeshGPUBase : MonoBehaviour
 		//else
 		//{
 		//#endif
-		adjacencyMatrix = MeshUtils.BuildAdjacencyMatrix(mesh.vertices, mesh.triangles, 16, adjacencyMatchingVertexTolerance * adjacencyMatchingVertexTolerance);
+		adjacencyMatrix = MeshUtils.BuildAdjacencyMatrix(mesh.vertices, mesh.triangles, maxOmegaCount, adjacencyMatchingVertexTolerance * adjacencyMatchingVertexTolerance);
 		//#if UNITY_EDITOR
 		//	var json = JsonUtility.ToJson(new AdjacencyMatrix(adjacencyMatrix));
 		//	Debug.Log(json);

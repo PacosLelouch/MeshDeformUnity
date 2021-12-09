@@ -22,16 +22,28 @@ public class MeshUtils// : MonoBehaviour
 			for (int j = 0; j < adj.GetLength(1); ++j)
 				adj[i, j] = -1;
 
-		int[] mapToUnique = MapVerticesToUniquePositions(v, minSqrDistance);
-
-		for(int tri = 0; tri < t.Length; tri = tri + 3)
+		if(minSqrDistance == 0.0f)
 		{
-			AddEdgeToAdjacencyMatrix(ref adj, mapToUnique, t[tri  ], t[tri+1]);
-			AddEdgeToAdjacencyMatrix(ref adj, mapToUnique, t[tri  ], t[tri+2]);
-			AddEdgeToAdjacencyMatrix(ref adj, mapToUnique, t[tri+1], t[tri+2]);
+			for (int tri = 0; tri < t.Length; tri = tri + 3)
+			{
+				AddEdgeToAdjacencyMatrixDirect(ref adj, t[tri], t[tri + 1]);
+				AddEdgeToAdjacencyMatrixDirect(ref adj, t[tri], t[tri + 2]);
+				AddEdgeToAdjacencyMatrixDirect(ref adj, t[tri + 1], t[tri + 2]);
+			}
 		}
+        else
+        {
+			int[] mapToUnique = MapVerticesToUniquePositions(v, minSqrDistance);
 
-		BroadcastAdjacencyFromUniqueToAllVertices(ref adj, mapToUnique);
+			for (int tri = 0; tri < t.Length; tri = tri + 3)
+			{
+				AddEdgeToAdjacencyMatrix(ref adj, mapToUnique, t[tri], t[tri + 1]);
+				AddEdgeToAdjacencyMatrix(ref adj, mapToUnique, t[tri], t[tri + 2]);
+				AddEdgeToAdjacencyMatrix(ref adj, mapToUnique, t[tri + 1], t[tri + 2]);
+			}
+
+			BroadcastAdjacencyFromUniqueToAllVertices(ref adj, mapToUnique);
+		}
 
 		Profiler.EndSample();
 		return adj;
@@ -77,7 +89,7 @@ public class MeshUtils// : MonoBehaviour
 
 	private static void AddVertexToAdjacencyMatrix(ref int[,] adjacencyMatrix, int from, int to)
 	{
-		Profiler.BeginSample("AddVertexToAdjacencyMatrix");
+		//Profiler.BeginSample("AddVertexToAdjacencyMatrix");
 		var maxNeighbors = adjacencyMatrix.GetLength(1);
 		for (int i = 0; i < maxNeighbors; i++)
 		{
@@ -90,7 +102,13 @@ public class MeshUtils// : MonoBehaviour
 				break;
 			}
 		}
-		Profiler.EndSample();
+		//Profiler.EndSample();
+	}
+
+	private static void AddEdgeToAdjacencyMatrixDirect(ref int[,] adjacencyMatrix, int v0, int v1)
+	{
+		AddVertexToAdjacencyMatrix(ref adjacencyMatrix, v0, v1);
+		AddVertexToAdjacencyMatrix(ref adjacencyMatrix, v1, v0);
 	}
 
 	private static void AddEdgeToAdjacencyMatrix(ref int[,] adjacencyMatrix, int[] mapToUnique, int v0, int v1)
@@ -98,8 +116,7 @@ public class MeshUtils// : MonoBehaviour
 		var u0 = mapToUnique[v0];
 		var u1 = mapToUnique[v1];
 
-		AddVertexToAdjacencyMatrix(ref adjacencyMatrix, u0, u1);
-		AddVertexToAdjacencyMatrix(ref adjacencyMatrix, u1, u0);
+		AddEdgeToAdjacencyMatrixDirect(ref adjacencyMatrix, u0, u1);
 	}
 
 	private static void BroadcastAdjacencyFromUniqueToAllVertices (ref int[,] adjacencyMatrix, int[] mapToUnique)

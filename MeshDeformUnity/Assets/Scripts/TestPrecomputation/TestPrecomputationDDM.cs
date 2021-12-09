@@ -48,8 +48,6 @@ public class TestPrecomputationDDM : MonoBehaviour
         skin = GetComponent<SkinnedMeshRenderer>();
         mesh = skin.sharedMesh;
 
-        adjacencyMatrix = DDMSkinnedMeshGPUBase.GetCachedAdjacencyMatrix(mesh, adjacencyMatchingVertexTolerance);
-
         BoneWeight[] bws = mesh.boneWeights;
 
         int vCount = mesh.vertexCount;
@@ -72,11 +70,13 @@ public class TestPrecomputationDDM : MonoBehaviour
 
     void CPU_Precomputation()
     {
+        System.GC.Collect();
         int bCount = skin.bones.Length;
         Vector3[] vertices = mesh.vertices;
         BoneWeight[] weights = mesh.boneWeights;
 
         UnityEngine.Profiling.Profiler.BeginSample("CPU_Precomputation");
+        adjacencyMatrix = DDMSkinnedMeshGPUBase.GetCachedAdjacencyMatrix(mesh, adjacencyMatchingVertexTolerance);
         DDMUtilsGPU.IndexWeightPair[,] laplacianWithIndex = DDMUtilsGPU.ComputeLaplacianWithIndexFromAdjacency(adjacencyMatrix);
         omegaWithIdxs = DDMUtilsGPU.ComputeOmegasFromLaplacian(
             vertices,
@@ -88,8 +88,11 @@ public class TestPrecomputationDDM : MonoBehaviour
 
     void GPU_Precomputation()
     {
+        System.GC.Collect();
         int bCount = skin.bones.Length;
         UnityEngine.Profiling.Profiler.BeginSample("GPU_Precomputation");
+
+        adjacencyMatrix = DDMSkinnedMeshGPUBase.GetCachedAdjacencyMatrix(mesh, adjacencyMatchingVertexTolerance);
         DDMUtilsGPU.ComputeLaplacianCBFromAdjacency(
             ref laplacianCB, precomputeShader, adjacencyMatrix);
         DDMUtilsGPU.ComputeOmegasCBFromLaplacianCB(

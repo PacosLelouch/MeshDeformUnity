@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.13859051, g: 0.11594514, b: 0.092304744, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -262,11 +262,10 @@ MonoBehaviour:
   deformNormals: 1
   weightedSmooth: 0
   useCompute: 1
-  adjacencyMatchingVertexTolerance: 0.0001
+  adjacencyMatchingVertexTolerance: 0
   debugMode: 0
   ductTapedShader: {fileID: 4800000, guid: 943eb20414209bd42aad0509708d1766, type: 3}
   computeShader: {fileID: 7200000, guid: 4b734e0ff4eb64b4290319e21101b8d5, type: 3}
-  usePrefilteredBoneWeights: 0
 --- !u!1001 &478149679
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -349,11 +348,10 @@ MonoBehaviour:
   deformNormals: 1
   weightedSmooth: 0
   useCompute: 1
-  adjacencyMatchingVertexTolerance: 0.0001
+  adjacencyMatchingVertexTolerance: 0
   debugMode: 0
   ductTapedShader: {fileID: 4800000, guid: 943eb20414209bd42aad0509708d1766, type: 3}
   computeShader: {fileID: 7200000, guid: 4b734e0ff4eb64b4290319e21101b8d5, type: 3}
-  usePrefilteredBoneWeights: 0
 --- !u!1001 &647162724
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -436,11 +434,10 @@ MonoBehaviour:
   deformNormals: 1
   weightedSmooth: 0
   useCompute: 1
-  adjacencyMatchingVertexTolerance: 0.0001
+  adjacencyMatchingVertexTolerance: 0
   debugMode: 0
   ductTapedShader: {fileID: 4800000, guid: 943eb20414209bd42aad0509708d1766, type: 3}
   computeShader: {fileID: 7200000, guid: 4b734e0ff4eb64b4290319e21101b8d5, type: 3}
-  usePrefilteredBoneWeights: 0
 --- !u!1 &715269873
 GameObject:
   m_ObjectHideFlags: 0
@@ -616,11 +613,10 @@ MonoBehaviour:
   deformNormals: 1
   weightedSmooth: 0
   useCompute: 1
-  adjacencyMatchingVertexTolerance: 0.0001
+  adjacencyMatchingVertexTolerance: 0
   debugMode: 0
   ductTapedShader: {fileID: 4800000, guid: 943eb20414209bd42aad0509708d1766, type: 3}
   computeShader: {fileID: 7200000, guid: 4b734e0ff4eb64b4290319e21101b8d5, type: 3}
-  usePrefilteredBoneWeights: 0
 --- !u!1 &1124874761
 GameObject:
   m_ObjectHideFlags: 0
