@@ -29,7 +29,7 @@ Add `MeshDeformUnity` to Unity Hub and select unity version. Then you can open t
 
 
 
-These algorithms aim to do skinning with efficiency, quality and ease of authoring. See [technical notes](Notes.md) for technical details. 
+These algorithms aim to do skinning with efficiency, quality and ease of authoring. See [technical notes](notes.md) for technical details. 
 
 
 
