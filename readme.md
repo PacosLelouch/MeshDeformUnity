@@ -29,7 +29,33 @@ Add `MeshDeformUnity` to Unity Hub and select unity version. Then you can open t
 
 
 
-These algorithms aim to do skinning with efficiency, quality and ease of authoring. See [technical notes](notes.md) for technical details. 
+These algorithms aim to do skinning with efficiency, quality and ease of authoring. 
+
+
+
+![Delta Mush Principle 1](E:\Github\Unity\MeshDeformUnityProject\Readme\Principle_DeltaMush_1.png)
+
+
+
+Direct Delta Mush is an algorithm that improves on the efficiency and control of Delta Mush. In brief, the original Delta Mush includes several processes. First in the precomputation step, we smooth the mesh to get the "mush", and compute the "delta" by subtracting the rest pose to the rest pose mush. During the animation, we can use some other method to do skinning, for example, linear blend skinning, to get the deformed mesh and "deformed delta". After that, we do the same smoothing to get the "deformed mush". Finally, we add the "deformed delta" and the "deformed mush" to get the "delta mush" result. 
+
+
+
+![Delta Mush Principle 2](E:\Github\Unity\MeshDeformUnityProject\Readme\Principle_DeltaMush_2.png)
+
+![Direct Delta Mush Principle 1](E:\Github\Unity\MeshDeformUnityProject\Readme\Principle_DirectDeltaMush_1.png)
+
+
+
+DDM turns the iterative algorithm into a direct version, with the same ballpark computational form as some previous geometric weight blending algorithms. In this case, we move many computation into precomputation. Although the precomputation takes longer time to complete compared to the DM, it makes the quality independent of the iteration of smoothing. 
+
+
+
+The [paper](https://www.ea.com/seed/news/siggraph2019-direct-delta-mush) also shows some variants which are equivalent to special cases of several previous skinning algorithms. 
+
+
+
+See [technical notes](notes.md) for technical details. 
 
 
 
