@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class TestPrecomputationDDM : MonoBehaviour
 {
+    public string howToTest = "Press 't' to trigger the test. Make sure to pause the profiling quickly!";
+
     public ComputeShader precomputeShader;
 
     public bool testCPU = true;
@@ -69,6 +71,13 @@ public class TestPrecomputationDDM : MonoBehaviour
         DDMUtilsGPU.isTestingPerformance = true;
     }
 
+    void PrecomputationAdjacencyMatrix()
+    {
+        UnityEngine.Profiling.Profiler.BeginSample("PrecomputationAdjacencyMatrix");
+        adjacencyMatrix = DDMSkinnedMeshGPUBase.GetCachedAdjacencyMatrix(mesh, adjacencyMatchingVertexTolerance);
+        UnityEngine.Profiling.Profiler.EndSample();
+    }
+
     void CPU_Precomputation()
     {
         System.GC.Collect();
@@ -77,7 +86,6 @@ public class TestPrecomputationDDM : MonoBehaviour
         BoneWeight[] weights = mesh.boneWeights;
 
         UnityEngine.Profiling.Profiler.BeginSample("CPU_Precomputation");
-        adjacencyMatrix = DDMSkinnedMeshGPUBase.GetCachedAdjacencyMatrix(mesh, adjacencyMatchingVertexTolerance);
         DDMUtilsGPU.IndexWeightPair[,] laplacianWithIndex = DDMUtilsGPU.ComputeLaplacianWithIndexFromAdjacency(adjacencyMatrix);
         omegaWithIdxs = DDMUtilsGPU.ComputeOmegasFromLaplacian(
             vertices,
@@ -93,7 +101,6 @@ public class TestPrecomputationDDM : MonoBehaviour
         int bCount = skin.bones.Length;
         UnityEngine.Profiling.Profiler.BeginSample("GPU_Precomputation");
 
-        adjacencyMatrix = DDMSkinnedMeshGPUBase.GetCachedAdjacencyMatrix(mesh, adjacencyMatchingVertexTolerance);
         DDMUtilsGPU.ComputeLaplacianCBFromAdjacency(
             ref laplacianCB, precomputeShader, adjacencyMatrix);
         DDMUtilsGPU.ComputeOmegasCBFromLaplacianCB(
@@ -104,10 +111,15 @@ public class TestPrecomputationDDM : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void LateUpdate()
     {
         if (Input.GetKey("t"))
         {
+            if(adjacencyMatrix == null)
+            {
+                Debug.Log("Test precomputation adjacency matrix.");
+                PrecomputationAdjacencyMatrix();
+            }
             if (testGPU)
             {
                 testGPU = false;
