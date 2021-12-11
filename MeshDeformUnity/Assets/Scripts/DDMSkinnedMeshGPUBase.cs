@@ -14,8 +14,8 @@ abstract public class DDMSkinnedMeshGPUBase : MonoBehaviour
 {
 	public int iterations = 5;
 
-	public float translationSmooth = 0.9f; 
-	public float rotationSmooth = 0.9f;
+	public float smoothLambda = 0.9f; 
+	//public float rotationSmooth = 0.9f;
 	//public float dm_blend = 0.0f;
 
 	//public bool deformNormals = true;
@@ -131,7 +131,7 @@ abstract public class DDMSkinnedMeshGPUBase : MonoBehaviour
 		DDMUtilsGPU.ComputeOmegasCBFromLaplacianCB(
 			ref omegasCB, precomputeShader,
 			verticesCB, laplacianCB, weightsCB,
-			bCount, iterations, translationSmooth);
+			bCount, iterations, smoothLambda);
 
 		if (computeShader && ductTapedShader)
 		{
