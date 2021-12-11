@@ -70,7 +70,7 @@ void DeformMesh(uint3 groupID : SV_GroupID, uint3 groupThreadID : SV_GroupThread
         float3 M_t0 = ZERO_VECTOR_3;
         DecomposeMat(Bones[Lastomega0.index], M_R0, temp0, M_t0);
 		
-        float4 M_q0 = vector_to_quaternion(M_t0);
+        float4 M_q0 = matrix_to_quaternion(M_R0);
 		
         sum_R = Lastomega0.weight * M_q0;
         sum_t = Lastomega0.weight * (mul(M_R0, Ps[idx]) + M_t0);
@@ -88,7 +88,7 @@ void DeformMesh(uint3 groupID : SV_GroupID, uint3 groupThreadID : SV_GroupThread
             float3 M_t = ZERO_VECTOR_3;
             DecomposeMat(Bones[Lastomega.index], M_R, temp, M_t);
 		
-            float4 M_q = vector_to_quaternion(M_t);
+            float4 M_q = matrix_to_quaternion(M_R);
 		
             sum_R += Lastomega.weight * M_q;
             sum_t += Lastomega.weight * (mul(M_R, Ps[idx]) + M_t);

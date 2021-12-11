@@ -103,69 +103,48 @@ OmegaLastColumnStructWithIndex VectorToOmegaLastColumnStructWithIndex(float3 X, 
     return res;
 }
 
-float4 q_look_at(float3 forward, float3 up)
+float4 matrix_to_quaternion(float3x3 mat)
 {
-    float3 right = normalize(cross(forward, up));
-    up = normalize(cross(forward, right));
+    float4 q = ZERO_VECTOR_4;
 
-    float m00 = right.x;
-    float m01 = right.y;
-    float m02 = right.z;
-    float m10 = up.x;
-    float m11 = up.y;
-    float m12 = up.z;
-    float m20 = forward.x;
-    float m21 = forward.y;
-    float m22 = forward.z;
-
-    float num8 = (m00 + m11) + m22;
-    float4 q = QUATERNION_IDENTITY;
-    if (num8 > 0.0)
+    float trace = mat[0][0] + mat[1][1] + mat[2][2];
+    if (trace > 0)
     {
-        float num = sqrt(num8 + 1.0);
-        q.w = num * 0.5;
-        num = 0.5 / num;
-        q.x = (m12 - m21) * num;
-        q.y = (m20 - m02) * num;
-        q.z = (m01 - m10) * num;
-        return q;
+        float s = 0.5f / sqrt(trace + 1.0f);
+        q.w = 0.25f / s;
+        q.x = (mat[2][1] - mat[1][2]) * s;
+        q.y = (mat[0][2] - mat[2][0]) * s;
+        q.z = (mat[1][0] - mat[0][1]) * s;
+    }
+    else
+    {
+        if (mat[0][0] > mat[1][1] && mat[0][0] > mat[2][2])
+        {
+            float s = 2.0f * sqrt(1.0f + mat[0][0] - mat[1][1] - mat[2][2]);
+            q.w = (mat[2][1] - mat[1][2]) / s;
+            q.x = 0.25f * s;
+            q.y = (mat[0][1] + mat[1][0]) / s;
+            q.z = (mat[0][2] + mat[2][0]) / s;
+        }
+        else if (mat[1][1] > mat[2][2])
+        {
+            float s = 2.0f * sqrt(1.0f + mat[1][1] - mat[0][0] - mat[2][2]);
+            q.w = (mat[0][2] - mat[2][0]) / s;
+            q.x = (mat[0][1] + mat[1][0]) / s;
+            q.y = 0.25f * s;
+            q.z = (mat[1][2] + mat[2][1]) / s;
+        }
+        else
+        {
+            float s = 2.0f * sqrt(1.0f + mat[2][2] - mat[0][0] - mat[1][1]);
+            q.w = (mat[1][0] - mat[0][1]) / s;
+            q.x = (mat[0][2] + mat[2][0]) / s;
+            q.y = (mat[1][2] + mat[2][1]) / s;
+            q.z = 0.25f * s;
+        }
     }
 
-    if ((m00 >= m11) && (m00 >= m22))
-    {
-        float num7 = sqrt(((1.0 + m00) - m11) - m22);
-        float num4 = 0.5 / num7;
-        q.x = 0.5 * num7;
-        q.y = (m01 + m10) * num4;
-        q.z = (m02 + m20) * num4;
-        q.w = (m12 - m21) * num4;
-        return q;
-    }
-
-    if (m11 > m22)
-    {
-        float num6 = sqrt(((1.0 + m11) - m00) - m22);
-        float num3 = 0.5 / num6;
-        q.x = (m10 + m01) * num3;
-        q.y = 0.5 * num6;
-        q.z = (m21 + m12) * num3;
-        q.w = (m20 - m02) * num3;
-        return q;
-    }
-
-    float num5 = sqrt(((1.0 + m22) - m00) - m11);
-    float num2 = 0.5 / num5;
-    q.x = (m20 + m02) * num2;
-    q.y = (m21 + m12) * num2;
-    q.z = 0.5 * num5;
-    q.w = (m01 - m10) * num2;
     return q;
-}
-
-float4 vector_to_quaternion(float3 vec)
-{
-    //float3 up = normalize(cross(vec, float3(0, 1, 0)));
-    return normalize(q_look_at(vec, float3(0, 1, 0)));
 }
 
 float3x3 quaternion_to_matrix(float4 quat)
