@@ -33,7 +33,7 @@ These algorithms aim to do skinning with efficiency, quality and ease of authori
 
 
 
-![Delta Mush Principle 1](E:\Github\Unity\MeshDeformUnityProject\Readme\Principle_DeltaMush_1.png)
+![Delta Mush Principle 1](Readme/Principle_DeltaMush_1.png)
 
 
 
@@ -41,9 +41,9 @@ Direct Delta Mush is an algorithm that improves on the efficiency and control of
 
 
 
-![Delta Mush Principle 2](E:\Github\Unity\MeshDeformUnityProject\Readme\Principle_DeltaMush_2.png)
+![Delta Mush Principle 2](Readme/Principle_DeltaMush_2.png)
 
-![Direct Delta Mush Principle 1](E:\Github\Unity\MeshDeformUnityProject\Readme\Principle_DirectDeltaMush_1.png)
+![Direct Delta Mush Principle 1](Readme/Principle_DirectDeltaMush_1.png)
 
 
 
