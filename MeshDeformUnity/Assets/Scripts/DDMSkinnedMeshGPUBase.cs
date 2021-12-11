@@ -80,7 +80,7 @@ abstract public class DDMSkinnedMeshGPUBase : MonoBehaviour
 
 	protected Material ductTapedMaterial;
 
-	public const int maxOmegaCount = 16;
+	public const int maxOmegaCount = 32;
 
 	protected void InitBase()
 	{

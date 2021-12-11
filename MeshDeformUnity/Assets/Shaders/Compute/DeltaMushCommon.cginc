@@ -11,7 +11,7 @@
 
 #define PI 3.14159265359f
 
-#define MAX_OMEGA_COUNT 16
+#define MAX_OMEGA_COUNT 32
 
 struct IndexWeightPair
 {

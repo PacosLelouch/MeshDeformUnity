@@ -132,7 +132,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 693b564c58d5b4647a3f65a5a706a189, type: 3}
       propertyPath: m_RootOrder
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 693b564c58d5b4647a3f65a5a706a189, type: 3}
       propertyPath: m_LocalPosition.x
@@ -469,7 +469,7 @@ MonoBehaviour:
   weightedSmooth: 0
   useCompute: 1
   adjacencyMatchingVertexTolerance: 0.0001
-  debugMode: 0
+  debugMode: 1
   ductTapedShader: {fileID: 4800000, guid: 943eb20414209bd42aad0509708d1766, type: 3}
   computeShader: {fileID: 7200000, guid: 4b734e0ff4eb64b4290319e21101b8d5, type: 3}
   usePrefilteredBoneWeights: 0
@@ -482,7 +482,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: eb29ae7da1ae31b4e8af9e19bbba16b4, type: 3}
       propertyPath: m_RootOrder
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: eb29ae7da1ae31b4e8af9e19bbba16b4, type: 3}
       propertyPath: m_LocalPosition.x
