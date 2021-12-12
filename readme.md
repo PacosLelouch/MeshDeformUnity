@@ -165,7 +165,7 @@ See [technical notes](notes.md) for technical details.
 
 ### Precomputation
 
-We implemented precomputation in GPU 
+We implemented precomputation of DDM in both CPU and GPU, and compare their performances on Wahoo model with 3809 vertices and 35 bones. Since building the adjacency matrix should be done in CPU, we don't compare this process. 
 
 
 
@@ -173,13 +173,17 @@ We implemented precomputation in GPU
 
 
 
+It can be clearly seen that the GPU implementation significantly improves the performance. The runtime of it grows almost linearly as the number of iterations.
+
+On the other hand, we test the GPU based precomputation on different models, with a larger range of iterations.
 
 
-![Performance Analysis Precomputation Model](Readme/PA_Precomp_Model.png)
+
+![Performance Analysis Animation](Readme/PA_Precomp_Model.png)
 
 
 
-TODO
+The figure above shows a nearly linear relation between iterations and the precomputation time, even on models of different sizes and within a larger iteration range. Also, as the number of vertices in the model becomes larger, the performance drops dramatically.
 
 
 
