@@ -9,7 +9,7 @@ using MathNet.Numerics.LinearAlgebra.Single;
 using MathNet.Numerics.LinearAlgebra.Solvers;
 
 //[ExecuteInEditMode]
-public class DDMSkinnedMeshGPUVar23 : DDMSkinnedMeshGPUBase
+public class DDMSkinnedMeshGPUVar2 : DDMSkinnedMeshGPUBase
 {
 	
 	internal ComputeBuffer lastcolsCB; // float4
@@ -83,11 +83,8 @@ public class DDMSkinnedMeshGPUVar23 : DDMSkinnedMeshGPUBase
 
 	void OnDestroy()
 	{
-		if (lastcolsCB != null)
-		{
-			lastcolsCB.Release();
-			psCB.Release();
-		}
+		lastcolsCB.Release();
+		psCB.Release();
 
 		ReleaseBase();
 	}

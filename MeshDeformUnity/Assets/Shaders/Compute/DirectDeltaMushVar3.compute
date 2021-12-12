@@ -14,7 +14,7 @@ struct OutputVertex
 // input
 StructuredBuffer<float3> Vertices;
 StructuredBuffer<float3> Normals;
-StructuredBuffer<BoneWeights> Weights;
+//StructuredBuffer<BoneWeights> Weights;
 StructuredBuffer<float4x4> Bones;
 //StructuredBuffer<OmegaStruct> Omegas;
 StructuredBuffer<OmegaLastColumnStructWithIndex> Lastcols;
@@ -57,8 +57,8 @@ void DeformMesh(uint3 groupID : SV_GroupID, uint3 groupThreadID : SV_GroupThread
 
 	float3 pos = Vertices[idx];
 	float3 normal = Normals[idx];
-	int4 boneIndices = Weights[idx].indices;
-	float4 boneWeights = Weights[idx].weights;
+	//int4 boneIndices = Weights[idx].indices;
+	//float4 boneWeights = Weights[idx].weights;
 
     float3x3 sum_R = ZERO_MATRIX_3;
     float3 sum_t = ZERO_VECTOR_3;
