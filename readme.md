@@ -167,6 +167,18 @@ See [technical notes](notes.md) for technical details.
 
 We implemented precomputation in GPU 
 
+
+
+![Performance Analysis Precomputation CPU](Readme/PA_Precomp_CPU.png)
+
+
+
+
+
+![Performance Analysis Precomputation Model](Readme/PA_Precomp_Model.png)
+
+
+
 TODO
 
 
