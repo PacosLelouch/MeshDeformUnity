@@ -253,7 +253,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   iterations: 10
   deformNormals: 1
-  weightedSmooth: 1
+  weightedSmooth: 0
   useCompute: 1
   adjacencyMatchingVertexTolerance: 0.0001
   debugMode: 0
@@ -586,7 +586,6 @@ GameObject:
   m_Component:
   - component: {fileID: 776713898}
   - component: {fileID: 776713897}
-  - component: {fileID: 776713899}
   m_Layer: 0
   m_Name: Directional Light
   m_TagString: Untagged
@@ -670,21 +669,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
---- !u!114 &776713899
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 776713896}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 50a0b050187bce3458ea023b0ffd4d55, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  iterations: 10
-  smoothLambda: 1
-  adjacencyMatchingVertexTolerance: 0.0001
 --- !u!1001 &1183478338
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -942,6 +926,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1750408157}
+  - component: {fileID: 1750408158}
   m_Layer: 0
   m_Name: TestDDMRuntimeObject
   m_TagString: Untagged
@@ -963,6 +948,21 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 11
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1750408158
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1750408156}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 50a0b050187bce3458ea023b0ffd4d55, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  iterations: 10
+  smoothLambda: 1
+  adjacencyMatchingVertexTolerance: 0.0001
 --- !u!1 &1904130628 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -8836536860902145631, guid: 2a6916a570b9b4945b21a2f1246fb224, type: 3}

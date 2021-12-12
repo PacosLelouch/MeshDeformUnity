@@ -165,12 +165,21 @@ TODO
 
 
 
+## Future Works
+
+- Implement different Laplacian matrix.
+- Refer to [the next paper]((https://www.ea.com/seed/news/ddm-compression-with-continuous-examples)).
+- Support more models and scaling.
+
+
+
 ## Credit & Reference
 
 1. [Unity](https://unity.com/)
 1. [Math.NET Numerics](https://github.com/mathnet/mathnet-numerics)
 1. [Delta Mush: smoothing deformations while preserving detail](https://dl.acm.org/doi/10.1145/2633374.2633376)
 1. [Direct Delta Mush Skinning and Variants](https://www.ea.com/seed/news/siggraph2019-direct-delta-mush)
+1. [Direct Delta Mush Skinning Compression with Continuous Examples](https://www.ea.com/seed/news/ddm-compression-with-continuous-examples)
 
 
 

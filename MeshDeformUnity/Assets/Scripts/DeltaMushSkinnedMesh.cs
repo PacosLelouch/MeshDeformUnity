@@ -8,7 +8,7 @@ public class DeltaMushSkinnedMesh : MonoBehaviour
 {
 	public int iterations = 10;
 	public bool deformNormals = true;
-	public bool weightedSmooth = true;
+	public bool weightedSmooth = false;//true;
 	public bool useCompute = true;
 
 	public float adjacencyMatchingVertexTolerance = 1e-4f;
