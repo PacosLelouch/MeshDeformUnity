@@ -63,7 +63,13 @@ DDM turns the iterative algorithm into a direct version, with the same ballpark 
 
 
 
-TODO: Effects with different iterations.
+| 0 iter (LBS)                          | 2 iters                               | 4 iters                               | 8 iters                               | 16 iters                               |
+| ------------------------------------- | ------------------------------------- | ------------------------------------- | ------------------------------------- | -------------------------------------- |
+| ![img](Readme/VisualEffect_Iter0.png) | ![img](Readme/VisualEffect_Iter2.png) | ![img](Readme/VisualEffect_Iter4.png) | ![img](Readme/VisualEffect_Iter8.png) | ![img](Readme/VisualEffect_Iter16.png) |
+
+
+
+The table above shows how the number of iterations affect the visual effect of skinning. With more and more iterations, the elbow shows smoother, and less bulging effect. 
 
 
 
