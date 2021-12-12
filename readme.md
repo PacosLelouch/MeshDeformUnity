@@ -57,7 +57,17 @@ DDM turns the iterative algorithm into a direct version, with the same ballpark 
 
 The [paper](https://www.ea.com/seed/news/siggraph2019-direct-delta-mush) also shows some variants which are equivalent to special cases of several previous skinning algorithms. 
 
-TODO
+- The variant 0 is the full DDM model. 
+- The variant 1 is an approximation by taking the inverse transpose followed by determinant normalization. The visual effect is equivalent to the implementation of the original DM. However, the rotation matrix is approximated, so the deformation is distorted. 
+- The variant 2 and variant 3 use less precomputation data, directly computing the rotation matrix by blending the rotation components of bone transformations, but those representations cannot propagate changes from bone translations to the local skin rotation. For DDM v2, the rotation matrix is blended in quaternion space, and for DDM v3, the rotation is blended in linear space. 
+- The variant 4 makes the translation blended directly, based on the variant 2, thus using even less precomputation data. In some cases, it is equal to skinning with optimized centers of rotation (CoR). 
+- The practical application of the variant 5 is replacing the skinning weight solver using the original DM as the training data. While we are using the variant 5, we are actually using the linear blend skinning in runtime, so we don't implement the variant 5. 
+
+
+
+![Variants](Readme/Principle_Variants_1.png)
+
+
 
 See [technical notes](notes.md) for technical details. 
 
@@ -108,7 +118,7 @@ See [technical notes](notes.md) for technical details.
 
    
 
-5. Set 30 to the `Iterations`, for example. Then click the `Play` button, and switch to the `Scene` view. Expand the skeleton in the `Hierarchy` window and you can select which joint to edit. 
+5. Set 30 to the `Iterations`, for example. For this model, modify the `Adjacency Matching Vertex Tolerance`. Then click the `Play` button, and switch to the `Scene` view. Expand the skeleton in the `Hierarchy` window and you can select which joint to edit. 
 
    
 
@@ -135,8 +145,6 @@ See [technical notes](notes.md) for technical details.
    
 
    After you play, you can see the animation. 
-
-   
 
 
 
@@ -171,6 +179,6 @@ TODO
 2. [Milestone 1](https://docs.google.com/presentation/d/1DddtqMYNPFK_de73_3AZ3dXIFQ1iPYBxOBAKMeCrQ8A/)
 3. [Milestone 2](https://docs.google.com/presentation/d/14nwoKlDBEHcIAdbmpu_0bEEPnFItTixbUZDCPtQ1mfM/)
 3. [Milestone 3](https://docs.google.com/presentation/d/1FIu6bGBnXOtndSAxtpXztczM1mbGk7st8uuC3rlGfBQ/)
-3. [Final]()
+3. [Final Presentation](https://docs.google.com/presentation/d/1wim-hyjRPX4jIR6AkHR4tgXh2nGj3MpmaegtT0uUxrw/)
 3. [Sample Video]()
 
