@@ -4,7 +4,15 @@ Real-time mesh skinning with DDM implemented in Unity 2020.3.13.
 
 
 
-TODO
+![Overview1](Readme/Overview1.gif)
+
+<center>With DDM (left), there is less bulging effect than built-in skinning (right).</center>
+
+
+
+![Overview2](Readme/Overview2.gif)
+
+<center>We can get smooth skinning result even with rigid binding.</center>
 
 
 
@@ -52,6 +60,10 @@ This kind of methods ease the process of trial-and-error weight painting. Howeve
 
 
 DDM turns the iterative algorithm into a direct version, with the same ballpark computational form as some previous geometric weight blending algorithms. In this case, we move many computation into precomputation. Although the precomputation takes longer time to complete compared to the DM, it makes the quality independent of the iteration of smoothing. 
+
+
+
+TODO: Effects with different iterations.
 
 
 
@@ -145,7 +157,7 @@ See [technical notes](notes.md) for technical details.
 
    
 
-   After you play, you can see the animation. 
+   After you play, you can see the animation. Some of the models can be found at [mixamo](https://www.mixamo.com/).
 
 
 
@@ -161,7 +173,19 @@ TODO
 
 ### Animation
 
-TODO
+We test the runtime performance of different variants of DDM, as well as the original DM and the built-in linear blend skinning. These are tested with two models: Wahoo with 66654 vertices and 45 bones, and Ninja with 13560 vertices and 52 bones. 
+
+
+
+![Performance Analysis Animation](Readme/PA_Animation.png)
+
+
+
+It is clear that even though we only set 10 iterations, the Delta Mush is much costlier than any variants of the Direct Delta Mush. The variants of the DDM performs different, with v0, v1, and v4 faster than v2 and v3. The built-in linear blend skinning is the fastest, which is very straightforward and reasonable. 
+
+
+
+The presented results may include significant overhead that would need to be investigated with low-level programming, as the [paper](https://www.ea.com/seed/news/siggraph2019-direct-delta-mush) says in section 4, so they might be much faster if we carefully optimize v2, v3, and v4. 
 
 
 
@@ -180,6 +204,7 @@ TODO
 1. [Delta Mush: smoothing deformations while preserving detail](https://dl.acm.org/doi/10.1145/2633374.2633376)
 1. [Direct Delta Mush Skinning and Variants](https://www.ea.com/seed/news/siggraph2019-direct-delta-mush)
 1. [Direct Delta Mush Skinning Compression with Continuous Examples](https://www.ea.com/seed/news/ddm-compression-with-continuous-examples)
+1. [mixamo](https://www.mixamo.com/)
 
 
 
