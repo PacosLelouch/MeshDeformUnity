@@ -83,7 +83,7 @@ public class DeltaMushSkinnedMesh : MonoBehaviour
 
 		deformedMesh = new DeformedMesh(mesh.vertexCount);
 
-		adjacencyMatrix = GetCachedAdjacencyMatrix(mesh, adjacencyMatchingVertexTolerance);
+		adjacencyMatrix = DDMSkinnedMeshGPUBase.GetCachedAdjacencyMatrix(mesh, adjacencyMatchingVertexTolerance);
 
 		// Compute
 		if (SystemInfo.supportsComputeShaders && computeShader && ductTapedShader)
@@ -220,37 +220,37 @@ public class DeltaMushSkinnedMesh : MonoBehaviour
 		}
 	}
 
-	static private int[,] GetCachedAdjacencyMatrix(Mesh mesh, float adjacencyMatchingVertexTolerance)
-	{
-		int [,] adjacencyMatrix;
-		//#if UNITY_EDITOR
-		////var path = Path.Combine(Application.persistentDataPath, AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(mesh)) + ".adj");
-		//var path = Path.Combine("", AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(mesh)) + "_" + adjacencyMatchingVertexTolerance.ToString() + ".adj");
-		//Debug.Log(path);
-		//if (File.Exists(path))
-		//{
-		//	string json = File.ReadAllText(path);
-		//	adjacencyMatrix = JsonUtility.FromJson<AdjacencyMatrix>(json).data;
-		//}
-		//else
-		//{
-		//#endif
-			adjacencyMatrix = MeshUtils.BuildAdjacencyMatrix(mesh.vertices, mesh.triangles, 16, adjacencyMatchingVertexTolerance*adjacencyMatchingVertexTolerance);
-		//#if UNITY_EDITOR
-		//	var json = JsonUtility.ToJson(new AdjacencyMatrix(adjacencyMatrix));
-		//	Debug.Log(json);
+	//static private int[,] GetCachedAdjacencyMatrix(Mesh mesh, float adjacencyMatchingVertexTolerance)
+	//{
+	//	int [,] adjacencyMatrix;
+	//	//#if UNITY_EDITOR
+	//	////var path = Path.Combine(Application.persistentDataPath, AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(mesh)) + ".adj");
+	//	//var path = Path.Combine("", AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(mesh)) + "_" + adjacencyMatchingVertexTolerance.ToString() + ".adj");
+	//	//Debug.Log(path);
+	//	//if (File.Exists(path))
+	//	//{
+	//	//	string json = File.ReadAllText(path);
+	//	//	adjacencyMatrix = JsonUtility.FromJson<AdjacencyMatrix>(json).data;
+	//	//}
+	//	//else
+	//	//{
+	//	//#endif
+	//		adjacencyMatrix = MeshUtils.BuildAdjacencyMatrix(mesh.vertices, mesh.triangles, 16, adjacencyMatchingVertexTolerance*adjacencyMatchingVertexTolerance);
+	//	//#if UNITY_EDITOR
+	//	//	var json = JsonUtility.ToJson(new AdjacencyMatrix(adjacencyMatrix));
+	//	//	Debug.Log(json);
 
-		//	using (FileStream fs = new FileStream(path, FileMode.Create))
-		//	{
-		//		using (StreamWriter writer = new StreamWriter(fs))
-		//		{
-		//			writer.Write(json);
-		//		}
-		//	}
-		//}
-		//#endif
-		return adjacencyMatrix;
-	}
+	//	//	using (FileStream fs = new FileStream(path, FileMode.Create))
+	//	//	{
+	//	//		using (StreamWriter writer = new StreamWriter(fs))
+	//	//		{
+	//	//			writer.Write(json);
+	//	//		}
+	//	//	}
+	//	//}
+	//	//#endif
+	//	return adjacencyMatrix;
+	//}
 	#endregion
 
 	private int GetSmoothKernel()

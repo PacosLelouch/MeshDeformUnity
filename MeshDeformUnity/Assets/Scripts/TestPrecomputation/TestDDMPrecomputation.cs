@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TestPrecomputationDDM : MonoBehaviour
+public class TestDDMPrecomputation : MonoBehaviour
 {
     public string howToTest = "Press 't' to trigger the test. Make sure to pause the profiling quickly!";
 

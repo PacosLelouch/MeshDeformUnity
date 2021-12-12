@@ -63,6 +63,8 @@ The [paper](https://www.ea.com/seed/news/siggraph2019-direct-delta-mush) also sh
 - The variant 4 makes the translation blended directly, based on the variant 2, thus using even less precomputation data. In some cases, it is equal to skinning with optimized centers of rotation (CoR). 
 - The practical application of the variant 5 is replacing the skinning weight solver using the original DM as the training data. While we are using the variant 5, we are actually using the linear blend skinning in runtime, so we don't implement the variant 5. 
 
+Keep in mind that using less precomputation data doesn't mean the performance would be improved. 
+
 
 
 ![Variants](Readme/Principle_Variants_1.png)
@@ -75,7 +77,7 @@ See [technical notes](notes.md) for technical details.
 
 ## How to Use
 
-### 
+
 
 1. Load models, and toggle `Read/Write Enabled`. 
 
@@ -108,7 +110,6 @@ See [technical notes](notes.md) for technical details.
    - `Use Compute` determines whether you use GPU skinning or CPU skinning, but currently we only implemented GPU skinning for most of the variants. 
    - `Adjacency Matching Vertex Tolerance` can be set with a small positive float number if you need to merge the adjacency data of the vertices which are very close to each other, but enabling this process may cause longer precomputations.
    -  `Debug Mode` is for comparison to the visual effect of the built-in skinning if you assign `Compare With Linear Blend` to this attribute. 
-   - `Compute Shader` determines which compute shader you are using. In most cases, you don't need to modify this attribute, but for `DDM Skinned Mesh GPU Var 23`, you can switch the compute shader between `DirectDeltaMushVar2` and `DirectDeltaMushVar3`. 
 
    You can modify `Iterations` and `Smooth Lambda` to change the visual effect of the runtime skinning. 
 

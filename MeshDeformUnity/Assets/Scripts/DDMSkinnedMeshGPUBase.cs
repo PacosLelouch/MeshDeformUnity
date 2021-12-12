@@ -12,6 +12,7 @@ using MathNet.Numerics.LinearAlgebra.Solvers;
 [RequireComponent(typeof(SkinnedMeshRenderer))]
 abstract public class DDMSkinnedMeshGPUBase : MonoBehaviour
 {
+	//public bool readCachedAdjacencyMatrix = true;
 	public int iterations = 5;
 
 	public float smoothLambda = 0.9f; 
@@ -22,7 +23,7 @@ abstract public class DDMSkinnedMeshGPUBase : MonoBehaviour
 	//public bool weightedSmooth = false;//true;
 	public bool useCompute = true;
 
-	public float adjacencyMatchingVertexTolerance = 0.0f;//1e-4f;
+	public float adjacencyMatchingVertexTolerance = 1e-4f;// 0.0f;
 
 	public enum DebugMode { Off, CompareWithLinearBlend, /*SmoothOnly, Deltas*/ }
 
@@ -63,7 +64,7 @@ abstract public class DDMSkinnedMeshGPUBase : MonoBehaviour
 	public ComputeShader precomputeShader;
 	[HideInInspector]
 	public Shader ductTapedShader;
-	//[HideInInspector]
+	[HideInInspector]
 	public ComputeShader computeShader;
 	protected int deformKernel;
 	protected int computeThreadGroupSizeX;
@@ -105,6 +106,7 @@ abstract public class DDMSkinnedMeshGPUBase : MonoBehaviour
 
 		deformedMesh = new DeformedMesh(mesh.vertexCount);
 
+		//adjacencyMatrix = GetCachedAdjacencyMatrix(mesh, adjacencyMatchingVertexTolerance, readCachedAdjacencyMatrix);
 		adjacencyMatrix = GetCachedAdjacencyMatrix(mesh, adjacencyMatchingVertexTolerance);
 
 		vCount = mesh.vertexCount;
@@ -241,36 +243,50 @@ abstract public class DDMSkinnedMeshGPUBase : MonoBehaviour
 		}
 	}
 
-	static public int[,] GetCachedAdjacencyMatrix(Mesh mesh, float adjacencyMatchingVertexTolerance)
+	static protected System.Collections.Generic.Dictionary<Mesh, int[,]> adjacencyMatrixMap = new System.Collections.Generic.Dictionary<Mesh, int[,]>();
+
+	static public int[,] GetCachedAdjacencyMatrix(Mesh mesh, float adjacencyMatchingVertexTolerance = 1e-4f, bool readCachedADjacencyMatrix = false)
 	{
 		int[,] adjacencyMatrix;
-		//#if UNITY_EDITOR
-		////var path = Path.Combine(Application.persistentDataPath, AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(mesh)) + ".adj");
-		//var path = Path.Combine("", AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(mesh)) + "_" + adjacencyMatchingVertexTolerance.ToString() + ".adj");
-		//Debug.Log(path);
-		//if (File.Exists(path))
-		//{
-		//	string json = File.ReadAllText(path);
-		//	adjacencyMatrix = JsonUtility.FromJson<AdjacencyMatrix>(json).data;
-		//}
-		//else
-		//{
-		//#endif
-		adjacencyMatrix = MeshUtils.BuildAdjacencyMatrix(mesh.vertices, mesh.triangles, maxOmegaCount, adjacencyMatchingVertexTolerance * adjacencyMatchingVertexTolerance);
-		//#if UNITY_EDITOR
-		//	var json = JsonUtility.ToJson(new AdjacencyMatrix(adjacencyMatrix));
-		//	Debug.Log(json);
+		if(adjacencyMatrixMap.TryGetValue(mesh, out adjacencyMatrix))
+        {
+			return adjacencyMatrix;
+        }
+//#if UNITY_EDITOR
+//		if (readCachedADjacencyMatrix)
+//		{
+//			//var path = Path.Combine(Application.persistentDataPath, AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(mesh)) + ".adj");
+//			var path = Path.Combine("", AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(mesh)) + "_" + adjacencyMatchingVertexTolerance.ToString() + ".adj");
+//			Debug.Log(path);
+//			if (File.Exists(path))
+//			{
+//				string json = File.ReadAllText(path);
+//				adjacencyMatrix = JsonUtility.FromJson<AdjacencyMatrix>(json).data;
+//			}
+//			else
+//			{
+//#endif
+				adjacencyMatrix = MeshUtils.BuildAdjacencyMatrix(mesh.vertices, mesh.triangles, maxOmegaCount, adjacencyMatchingVertexTolerance * adjacencyMatchingVertexTolerance);
+//#if UNITY_EDITOR
+//				var json = JsonUtility.ToJson(new AdjacencyMatrix(adjacencyMatrix));
+//				Debug.Log(json);
 
-		//	using (FileStream fs = new FileStream(path, FileMode.Create))
-		//	{
-		//		using (StreamWriter writer = new StreamWriter(fs))
-		//		{
-		//			writer.Write(json);
-		//		}
-		//	}
-		//}
-		//#endif
-		return adjacencyMatrix;
+//				using (FileStream fs = new FileStream(path, FileMode.Create))
+//				{
+//					using (StreamWriter writer = new StreamWriter(fs))
+//					{
+//						writer.Write(json);
+//					}
+//				}
+//			}
+//		}
+//		else
+//        {
+//			adjacencyMatrix = MeshUtils.BuildAdjacencyMatrix(mesh.vertices, mesh.triangles, maxOmegaCount, adjacencyMatchingVertexTolerance * adjacencyMatchingVertexTolerance);
+//		}
+//#endif
+		adjacencyMatrixMap.Add(mesh, adjacencyMatrix);
+        return adjacencyMatrix;
 	}
 	#endregion
 
