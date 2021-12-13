@@ -10,7 +10,7 @@ These algorithms aim to do skinning with efficiency, quality and ease of authori
 
 
 
-![Delta Mush Principle 1](Readme\Principle_DeltaMush_1.png)
+![Delta Mush Principle 1](Readme/Principle_DeltaMush_1.png)
 
 
 
@@ -20,9 +20,9 @@ This kind of methods ease the process of trial-and-error weight painting. Howeve
 
 
 
-![Delta Mush Principle 2](Readme\Principle_DeltaMush_2.png)
+![Delta Mush Principle 2](Readme/Principle_DeltaMush_2.png)
 
-![Direct Delta Mush Principle 1](Readme\Principle_DirectDeltaMush_1.png)
+![Direct Delta Mush Principle 1](Readme/Principle_DirectDeltaMush_1.png)
 
 
 
