@@ -17,7 +17,9 @@
   * [twitter](https://twitter.com/scoutydren)
 
 ## Project Description
-Real-time mesh skinning with DDM implemented in Unity 2020.3.13.
+This is a Unity project implementing real-time mesh skinning using GPU-based Direct Delta Mush algorithm. This algorithm and its variants enable us to compute mesh skinning and animations with efficiency and quality, even with simply authored skinned meshes. 
+
+
 
 [![Overview1](Readme/Overview1.gif)](https://vimeo.com/655985843)
 
@@ -48,7 +50,13 @@ Add `MeshDeformUnity` to Unity Hub and select unity version. Then you can open t
 - Direct Delta Mush with GPU (from variant 0 to variant 5).
 - Precomputation of Direct Delta Mush with GPU.
 
+
+
+### Motivations
+
 These algorithms aim to do skinning with efficiency, quality and ease of authoring. 
+
+
 
 ![Delta Mush Principle 1](Readme/Principle_DeltaMush_1.png)
 
@@ -79,6 +87,8 @@ DDM turns the iterative algorithm into a direct version, with the same ballpark 
 The table above shows how the number of iterations affect the visual effect of skinning. With more and more iterations, the elbow shows smoother, and less bulging effect. 
 
 
+
+### Variants of Direct Delta Mush
 
 The [paper](https://www.ea.com/seed/news/siggraph2019-direct-delta-mush) also shows some variants which are equivalent to special cases of several previous skinning algorithms. 
 
