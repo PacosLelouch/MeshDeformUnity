@@ -19,7 +19,7 @@
 ## Project Description
 This is a Unity plugin on mesh skinning using GPU-based Direct Delta Mush algorithm. It is able compute  realistic mesh skinning and animation in real-time using the parallel computing power of GPU with negligible precomputation time. 
 
-![Overview1](Readme/Overview1.gif)
+[![Overview1](Readme/Overview1.gif)](https://vimeo.com/655985843)
 
 <center>With Direct Delta Mush (left), we get less bulging effect than what we get with built-in skinning (right).</center>
 
