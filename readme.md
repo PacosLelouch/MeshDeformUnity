@@ -1,5 +1,21 @@
 # Real-Time Mesh Skinning with Direct Delta Mush (Unity)
 
+**University of Pennsylvania, CIS 565: GPU Programming and Architecture, Final Project**
+
+* Xuntong Liang
+  * xuntong@seas.upenn.edu
+  * [LinkedIn](https://www.linkedin.com/in/xuntong-liang-406429181/)
+  * [GitHub](https://github.com/PacosLelouch)
+  * [twitter](https://twitter.com/XTL90234545)
+* Bowen Deng
+  * dengbw@seas.upenn.edu
+  * [LinkedIn](www.linkedin.com/in/bowen-deng-7dbw13)
+* Beini Gu
+  * gubeini@seas.upenn.edu
+  * [LinkedIn](www.linkedin.com/in/bowen-deng-7dbw13)
+  * [personal website](https://www.seas.upenn.edu/~gubeini/)
+  * [twitter](https://twitter.com/scoutydren)
+
 ## Project Description
 Real-time mesh skinning with DDM implemented in Unity 2020.3.13.
 
@@ -160,6 +176,8 @@ See [technical notes](notes.md) for technical details.
 
 ## Performance Analysis
 
+>Tested on: Windows 10, i7-10750H @ 2.60GHz 16GB, RTX 2070 Super with Max-Q 8192MB
+
 ### Precomputation
 
 We implemented precomputation of DDM in both CPU and GPU, and compare their performances on Wahoo model with 3809 vertices and 35 bones. Since building the adjacency matrix should be done in CPU, we don't compare this process. 
@@ -205,8 +223,9 @@ The presented results may include significant overhead that would need to be inv
 ## Future Works
 
 - Implement different Laplacian matrix.
-- Refer to [the next paper]((https://www.ea.com/seed/news/ddm-compression-with-continuous-examples)).
+- Refer to [the next paper in SIGGRAPH 2021]((https://www.ea.com/seed/news/ddm-compression-with-continuous-examples)).
 - Support more models and scaling.
+- Optimize implementation for variants.
 
 
 
@@ -217,7 +236,7 @@ The presented results may include significant overhead that would need to be inv
 1. [Delta Mush: smoothing deformations while preserving detail](https://dl.acm.org/doi/10.1145/2633374.2633376)
 1. [Direct Delta Mush Skinning and Variants](https://www.ea.com/seed/news/siggraph2019-direct-delta-mush)
 1. [Direct Delta Mush Skinning Compression with Continuous Examples](https://www.ea.com/seed/news/ddm-compression-with-continuous-examples)
-1. [mixamo](https://www.mixamo.com/)
+1. [Mixamo](https://www.mixamo.com/)
 
 
 
