@@ -23,13 +23,11 @@ This is a Unity project implementing real-time mesh skinning using GPU-based Dir
 
 [![Overview1](Readme/Overview1.gif)](https://vimeo.com/655985843)
 
-<center>With DDM (left), we get less bulging effect than what we get with built-in skinning (right).</center></br></br>
+<center>With Direct Delta Mush (left), we get less bulging effect than what we get with built-in skinning (right).</center>
 
 ![Overview2](Readme/Overview2.gif)
 
-<center>We can get smooth skinning result even with rigid binding.</center></br></br>
-
-
+<center>We can get smooth skinning result even with rigid binding.</center>
 
 ## How to Build
 
