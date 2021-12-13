@@ -1,20 +1,27 @@
 # Real-Time Mesh Skinning with Direct Delta Mush (Unity)
 
+## Project Description
 Real-time mesh skinning with DDM implemented in Unity 2020.3.13.
-
-
 
 ![Overview1](Readme/Overview1.gif)
 
 <center>With DDM (left), we get less bulging effect than what we get with built-in skinning (right).</center></br></br>
 
-
-
 ![Overview2](Readme/Overview2.gif)
 
 <center>We can get smooth skinning result even with rigid binding.</center></br></br>
 
+## Table of Contents
+[Build Instructions](#build-instructions)   
+[Features Overview](#overview-features)   
+[Usage](#usage)   
+[Performance Analysis](#performance-analysis)   
+[Future Works](#future-works)   
+[Reference](#reference)
+[Presentation Slides](#presentation)
+[Bloopers](#bloopers)
 
+<a name="build-instructions"/> 
 
 ## How to Build
 
@@ -23,25 +30,19 @@ Real-time mesh skinning with DDM implemented in Unity 2020.3.13.
 - Unity 2020.3.13
 - Visual Studio 2019
 
-
-
 ### Build
 
 Add `MeshDeformUnity` to Unity Hub and select unity version. Then you can open this project. 
 
+<a name="overview-features"/> 
 
-
-## Features
+## Features Overview
 
 - Delta Mush with CPU or GPU.
 - Direct Delta Mush with GPU (from variant 0 to variant 5).
 - Precomputation of Direct Delta Mush with GPU.
 
-
-
 These algorithms aim to do skinning with efficiency, quality and ease of authoring. 
-
-
 
 ![Delta Mush Principle 1](Readme/Principle_DeltaMush_1.png)
 
@@ -91,7 +92,7 @@ Keep in mind that using less precomputation data doesn't mean the performance wo
 
 See [technical notes](notes.md) for technical details. 
 
-
+<a name="usage"/> 
 
 ## How to Use
 
@@ -165,7 +166,7 @@ See [technical notes](notes.md) for technical details.
 
    After you play, you can see the animation. Some of the models can be found at [mixamo](https://www.mixamo.com/).
 
-
+<a name="performance-analysis"/> 
 
 ## Performance Analysis
 
@@ -210,6 +211,9 @@ It is clear that even though we only set 10 iterations, the Delta Mush is much c
 The presented results may include significant overhead that would need to be investigated with low-level programming, as the [paper](https://www.ea.com/seed/news/siggraph2019-direct-delta-mush) says in section 4, so they might be much faster if we carefully optimize v2, v3, and v4. 
 
 
+<a name="future-works"/> 
+
+
 
 ## Future Works
 
@@ -217,7 +221,7 @@ The presented results may include significant overhead that would need to be inv
 - Refer to [the next paper]((https://www.ea.com/seed/news/ddm-compression-with-continuous-examples)).
 - Support more models and scaling.
 
-
+<a name="reference"/> 
 
 ## Credit & Reference
 
@@ -228,7 +232,7 @@ The presented results may include significant overhead that would need to be inv
 1. [Direct Delta Mush Skinning Compression with Continuous Examples](https://www.ea.com/seed/news/ddm-compression-with-continuous-examples)
 1. [mixamo](https://www.mixamo.com/)
 
-
+<a name="presentations"/> 
 
 ## Presentations
 
@@ -239,3 +243,8 @@ The presented results may include significant overhead that would need to be inv
 3. [Final Presentation](https://docs.google.com/presentation/d/1wim-hyjRPX4jIR6AkHR4tgXh2nGj3MpmaegtT0uUxrw/)
 3. [Sample Video]()
 
+<a name="bloopers"/> 
+
+## Bloopers
+
+![Blooper](Readme/blooper.png)
