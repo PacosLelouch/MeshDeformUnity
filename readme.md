@@ -44,8 +44,6 @@ Add `MeshDeformUnity` to Unity Hub and select unity version. Then you can open t
 
 These algorithms aim to do skinning with efficiency, quality and ease of authoring. 
 
-
-
 ![Delta Mush Principle 1](Readme/Principle_DeltaMush_1.png)
 
 
@@ -248,3 +246,5 @@ The presented results may include significant overhead that would need to be inv
 <a name="bloopers"/> 
 
 ## Bloopers
+
+![Blooper](Readme/blooper.png)
