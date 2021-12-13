@@ -66,7 +66,13 @@ DDM turns the iterative algorithm into a direct version, with the same ballpark 
 
 
 
-TODO: Effects with different iterations.
+| 0 iter (LBS)                          | 2 iters                               | 4 iters                               | 8 iters                               | 16 iters                               |
+| ------------------------------------- | ------------------------------------- | ------------------------------------- | ------------------------------------- | -------------------------------------- |
+| ![img](Readme/VisualEffect_Iter0.png) | ![img](Readme/VisualEffect_Iter2.png) | ![img](Readme/VisualEffect_Iter4.png) | ![img](Readme/VisualEffect_Iter8.png) | ![img](Readme/VisualEffect_Iter16.png) |
+
+
+
+The table above shows how the number of iterations affect the visual effect of skinning. With more and more iterations, the elbow shows smoother, and less bulging effect. 
 
 
 
@@ -168,9 +174,25 @@ See [technical notes](notes.md) for technical details.
 
 ### Precomputation
 
-We implemented precomputation in GPU 
+We implemented precomputation of DDM in both CPU and GPU, and compare their performances on Wahoo model with 3809 vertices and 35 bones. Since building the adjacency matrix should be done in CPU, we don't compare this process. 
 
-TODO
+
+
+![Performance Analysis Precomputation CPU](Readme/PA_Precomp_CPU.png)
+
+
+
+It can be clearly seen that the GPU implementation significantly improves the performance. The runtime of it grows almost linearly as the number of iterations.
+
+On the other hand, we test the GPU based precomputation on different models, with a larger range of iterations.
+
+
+
+![Performance Analysis Animation](Readme/PA_Precomp_Model.png)
+
+
+
+The figure above shows a nearly linear relation between iterations and the precomputation time, even on models of different sizes and within a larger iteration range. Also, as the number of vertices in the model becomes larger, the performance drops dramatically.
 
 
 
