@@ -82,17 +82,29 @@ The table above shows how the number of iterations affect the visual effect of s
 
 The [paper](https://www.ea.com/seed/news/siggraph2019-direct-delta-mush) also shows some variants which are equivalent to special cases of several previous skinning algorithms. 
 
+
+
+![Variants](Readme/Principle_Variants_1.png)
+
+
+
 - The variant 0 is the full DDM model. 
 - The variant 1 is an approximation by taking the inverse transpose followed by determinant normalization. The visual effect is equivalent to the implementation of the original DM. However, the rotation matrix is approximated, so the deformation is distorted. 
 - The variant 2 and variant 3 use less precomputation data, directly computing the rotation matrix by blending the rotation components of bone transformations, but those representations cannot propagate changes from bone translations to the local skin rotation. For DDM v2, the rotation matrix is blended in quaternion space, and for DDM v3, the rotation is blended in linear space. 
 - The variant 4 makes the translation blended directly, based on the variant 2, thus using even less precomputation data. In some cases, it is equal to skinning with optimized centers of rotation (CoR). 
 - The practical application of the variant 5 is replacing the skinning weight solver using the original DM as the training data. While we are using the variant 5, we are actually using the linear blend skinning in runtime, so we don't implement the variant 5. 
 
-Keep in mind that using less precomputation data doesn't mean the performance would be improved. 
+Keep in mind that using less precomputation data doesn't mean the performance would be improved. The visual effect of different variants are shown below. For DDM v0 and DDM v2, there are less collapsing artifact, and v0 keeps the shape mostly, thus performs the best. 
 
 
 
-![Variants](Readme/Principle_Variants_1.png)
+| LBS                                 | v0                                 | v1                                 |
+| ----------------------------------- | ---------------------------------- | ---------------------------------- |
+| ![img](Readme/VisualEffect_LBS.png) | ![img](Readme/VisualEffect_v0.png) | ![img](Readme/VisualEffect_v1.png) |
+
+| v2                                 | v3                                 | v4                                 |
+| ---------------------------------- | ---------------------------------- | ---------------------------------- |
+| ![img](Readme/VisualEffect_v2.png) | ![img](Readme/VisualEffect_v3.png) | ![img](Readme/VisualEffect_v4.png) |
 
 
 
