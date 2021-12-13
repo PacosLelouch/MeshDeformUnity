@@ -19,7 +19,7 @@
 ## Project Description
 Real-time mesh skinning with DDM implemented in Unity 2020.3.13.
 
-![Overview1](Readme/Overview1.gif)
+[![Overview1](Readme/Overview1.gif)](https://vimeo.com/655985843)
 
 <center>With DDM (left), we get less bulging effect than what we get with built-in skinning (right).</center></br></br>
 
