@@ -6,7 +6,7 @@ Real-time mesh skinning with DDM implemented in Unity 2020.3.13.
 
 ![Overview1](Readme/Overview1.gif)
 
-<center>With DDM (left), there is less bulging effect than built-in skinning (right).</center></br></br>
+<center>With DDM (left), we get less bulging effect than what we get with built-in skinning (right).</center></br></br>
 
 
 
@@ -101,7 +101,7 @@ See [technical notes](notes.md) for technical details.
 
    
 
-   ![Load Model](Readme/HowToUse_Load1_Label.png)
+   ![Load Model](Readme/HowToUse_1Load_Label.png)
 
    
 
@@ -109,7 +109,7 @@ See [technical notes](notes.md) for technical details.
 
    
 
-   ![Drag to Scene](Readme/HowToUse_Select2.png)
+   ![Drag to Scene](Readme/HowToUse_2Select.png)
 
    
 
@@ -117,11 +117,11 @@ See [technical notes](notes.md) for technical details.
 
    
 
-   ![Add Component](Readme/HowToUse_AddComponent3_Label.png)
+   ![Add Component](Readme/HowToUse_3AddComponent_Label.png)
 
    
 
-4. Take a look at the component `DDM skinned Mesh GPU Var 23` for example. There are several attributes. 
+4. Take a look at the component `DDM skinned Mesh GPU Var 0` for example. There are several attributes. 
 
    - `Iterations` represents the iteration count of the precomputation. 
    - `Smooth Lambda` determines the smoothing result for each step. 
@@ -133,15 +133,15 @@ See [technical notes](notes.md) for technical details.
 
    
 
-   ![Add Component](Readme/HowToUse_Script4.png)
+   ![Add Component](Readme/HowToUse_4Script.png)
 
    
 
-5. Set 30 to the `Iterations`, for example. For this model, modify the `Adjacency Matching Vertex Tolerance`. Then click the `Play` button, and switch to the `Scene` view. Expand the skeleton in the `Hierarchy` window and you can select which joint to edit. 
+5. Set `Iterations` to 30, for example. For this model, set the `Adjacency Matching Vertex Tolerance` to a positive number to enable vertex matching. Then click the `Play` button, and switch to the `Scene` view. Expand the skeleton in the `Hierarchy` window and you can select which joint to edit. 
 
    
 
-   ![Select Joint](Readme/HowToUse_SelectJoint5_Label.png)
+   ![Select Joint](Readme/HowToUse_5SelectJoint_Label.png)
 
    
 
@@ -149,7 +149,7 @@ See [technical notes](notes.md) for technical details.
 
    
 
-   ![Deform Mesh](Readme/HowToUse_Deform6.png)
+   ![Deform Mesh](Readme/HowToUse_6Deform_Label.png)
 
    
 
@@ -157,9 +157,9 @@ See [technical notes](notes.md) for technical details.
 
    
 
-   ![Animator Controller](Readme/HowToUse_Animator7_Label.png)
+   ![Animator Controller](Readme/HowToUse_7Animator_Label.png)
 
-   ![Animator](Readme/HowToUse_Animator8_Label.png)
+   ![Animator](Readme/HowToUse_8Animator_Label.png)
 
    
 
