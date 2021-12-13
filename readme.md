@@ -17,17 +17,15 @@
   * [twitter](https://twitter.com/scoutydren)
 
 ## Project Description
-Real-time mesh skinning with DDM implemented in Unity 2020.3.13.
+This is a Unity plugin on mesh skinning using GPU-based Direct Delta Mush algorithm. It is able compute  realistic mesh skinning and animation in real-time using the parallel computing power of GPU with negligible precomputation time. 
 
 ![Overview1](Readme/Overview1.gif)
 
-<center>With DDM (left), we get less bulging effect than what we get with built-in skinning (right).</center></br></br>
+<center>With Direct Delta Mush (left), we get less bulging effect than what we get with built-in skinning (right).</center>
 
 ![Overview2](Readme/Overview2.gif)
 
-<center>We can get smooth skinning result even with rigid binding.</center></br></br>
-
-
+<center>We can get smooth skinning result even with rigid binding.</center>
 
 ## How to Build
 
